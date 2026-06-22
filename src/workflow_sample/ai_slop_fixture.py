@@ -46,13 +46,10 @@ def normalize_env_value(value: str | None) -> str:
     return value.strip()
 
 
-def parse_env_token(raw: str | None, fallback: str = "") -> str:
+def parse_env_token(raw: str | None) -> str:
     if raw is None:
-        return fallback
-    token = raw.strip()
-    if token == "":
-        return fallback
-    return token
+        return ""
+    return raw.strip()
 
 
 def summarize_offer_labels(labels: list[str]) -> tuple[str, ...]:
