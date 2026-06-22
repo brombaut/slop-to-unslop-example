@@ -95,8 +95,7 @@ jobs:
           python analyzer/scripts/compare-pr-analysis.py \
             --base "$BASE_JSON" \
             --head "$HEAD_JSON" \
-            --output /tmp/repo-analysis/report.md \
-            --top 10
+            --output /tmp/repo-analysis/report.md
 
       - name: Write step summary
         run: cat /tmp/repo-analysis/report.md >> "$GITHUB_STEP_SUMMARY"
