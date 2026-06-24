@@ -12,7 +12,7 @@ on:
         description: "Comma-separated AI slop rule ids to attempt"
         required: true
         type: string
-        default: "ai-slop/python-cross-language-api,ai-slop/python-function-level-import,ai-slop/python-broad-except,ai-slop/python-unjustified-suppression,ai-slop/python-hallucinated-import,ai-slop/python-llm-assertion-correctness"
+        default: "ai-slop/python-semantic-duplicate-business-logic,ai-slop/python-infrastructure-reinvention,ai-slop/python-cross-language-api,ai-slop/python-function-level-import,ai-slop/python-broad-except,ai-slop/python-unjustified-suppression,ai-slop/python-hallucinated-import,ai-slop/python-llm-assertion-correctness"
       limit:
         description: "Maximum diagnostic fix attempts"
         required: true
