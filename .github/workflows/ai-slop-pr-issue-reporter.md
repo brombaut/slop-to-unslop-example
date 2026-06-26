@@ -38,10 +38,10 @@ network:
 
 checkout:
   - path: base
-    ref: ${{ github.event.pull_request.base.sha || github.sha }}
+    ref: ${{ github.event.pull_request.base.sha }}
     fetch-depth: 0
   - path: head
-    ref: ${{ github.event.pull_request.head.sha || github.sha }}
+    ref: ${{ github.event.pull_request.head.sha }}
     fetch-depth: 0
   - repository: PGCodeLLM/code-health
     path: analyzer
@@ -95,7 +95,7 @@ safe-outputs:
   allowed-github-references: []
   create-issue:
     title-prefix: "[AI Slop] "
-    max: 10
+    max: 11
     deduplicate-by-title: true
     expires: 30
 ---
@@ -111,8 +111,8 @@ If the file is missing, invalid, empty, or contains no introduced diagnostics,
 do not create issues. Finish without visible GitHub writes.
 
 For each item in `introduced_diagnostics`, create one GitHub issue using the
-`create_issue` safe output. Create at most 10 issues. Preserve the order from
-the JSON file.
+`create_issue` safe output. Create at most 10 per-diagnostic issues. Preserve
+the order from the JSON file.
 
 Each issue title must be stable and deterministic:
 
@@ -146,6 +146,50 @@ none are present, write `None`.
 One concise, actionable recommendation based on the diagnostic fields. Prefer
 the diagnostic `help` field when it is present. Do not invent source code
 changes that are not supported by the diagnostic.
+
+After creating the per-diagnostic issues, create exactly one summary issue using
+the `create_issue` safe output.
+
+The summary issue title must be stable and deterministic:
+
+`Summary for PR #${{ github.event.pull_request.number }}`
+
+The summary issue body must include these sections:
+
+## Summary
+
+A short explanation that this issue collects the AI Slop diagnostics introduced
+by this pull request.
+
+## Pull Request
+
+- PR: #${{ github.event.pull_request.number }}
+- Base SHA: `${{ github.event.pull_request.base.sha }}`
+- Head SHA: `${{ github.event.pull_request.head.sha }}`
+
+## Introduced Diagnostics
+
+A markdown table with one row per per-diagnostic issue created in this run. The
+columns must be:
+
+- Issue Title
+- Rule
+- File
+- Line
+- Source
+
+The Issue Title column must contain the exact deterministic title used for the
+per-diagnostic issue, not an invented issue number.
+
+## Counts By Rule
+
+A markdown table with one row per rule and the number of introduced diagnostics
+for that rule.
+
+## Notes
+
+State that the individual issue titles are deterministic so repeated workflow
+runs can deduplicate by title.
 
 Use only the diagnostics in `/tmp/gh-aw/agent/introduced-diagnostics.json`.
 Do not create issues for existing base diagnostics, resolved diagnostics,
