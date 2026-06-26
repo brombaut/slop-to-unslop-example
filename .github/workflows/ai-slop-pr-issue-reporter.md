@@ -3,14 +3,6 @@ name: Code Quality Issue Reporter
 description: Scan PR base/head and create one GitHub issue summarizing AI Slop diagnostics and PyExamine findings introduced by the PR.
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - "**/*.py"
-      - "pyproject.toml"
-      - "requirements*.txt"
-      - "setup.py"
-      - "setup.cfg"
   workflow_dispatch:
 
 permissions:
