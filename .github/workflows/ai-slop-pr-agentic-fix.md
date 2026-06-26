@@ -29,7 +29,7 @@ engine:
 
 strict: true
 timeout-minutes: 90
-max-turns: 2
+max-turns: 8
 
 network:
   allowed:
@@ -48,8 +48,6 @@ safe-outputs:
   create-issue:
     title-prefix: "[Code Quality] "
     max: 1
-    deduplicate-by-title: true
-    expires: 30
   create-pull-request:
     title-prefix: "Apply code quality fixes"
     draft: false
@@ -510,7 +508,7 @@ If the introduced diagnostics file exists, is valid, and contains introduced
 diagnostics or findings, create exactly one issue using the `create_issue` safe
 output.
 
-The issue title must be stable and deterministic:
+The issue title must be:
 
 `Summary for PR #${{ github.event.pull_request.number }}`
 
@@ -563,11 +561,6 @@ Each subsection must include:
 
 A markdown table with one row per source/rule pair and the number of introduced
 diagnostics or findings for that pair.
-
-## Notes
-
-State that this issue title is deterministic so repeated workflow runs can
-deduplicate by title.
 
 Use only the diagnostics and findings in
 `/tmp/gh-aw/agent/introduced-diagnostics.json`. Do not create issues for
