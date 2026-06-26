@@ -20,14 +20,21 @@ permissions:
 
 engine:
   id: copilot
-  model: gpt-5-mini
+  env:
+    COPILOT_PROVIDER_BASE_URL: ${{ secrets.COPILOT_PROVIDER_BASE_URL }}
+    COPILOT_PROVIDER_API_KEY: ${{ secrets.COPILOT_PROVIDER_API_KEY }}
+    COPILOT_PROVIDER_TYPE: openai
+    COPILOT_PROVIDER_WIRE_API: responses
+    COPILOT_MODEL: ${{ vars.COPILOT_MODEL || 'gpt-5-mini' }}
 
 strict: true
 timeout-minutes: 30
 max-turns: 4
 
 network:
-  allowed: [github]
+  allowed:
+    - github
+    - api.openai.com
 
 checkout:
   - path: base
