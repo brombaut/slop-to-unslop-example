@@ -34,7 +34,7 @@ max-turns: 4
 network:
   allowed:
     - github
-    - api.openai.com
+    - arcyleung-ubuntu.tailb940e6.ts.net
 
 checkout:
   - path: base
