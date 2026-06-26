@@ -21,7 +21,7 @@ def test_trial_discount_candidate_is_truthy():
 
     result = qualifies_for_trial_discount(customer, invoice)
 
-    assert result == result
+    assert result is True
 
 
 def test_parallel_offer_rule_matches_expected_result():

@@ -9,8 +9,11 @@ class LabelBuffer:
     def __init__(self) -> None:
         self.items: list[str] = []
 
-    def push(self, label: str) -> None:
+    def append(self, label: str) -> None:
         self.items.append(label)
+
+    def push(self, label: str) -> None:
+        self.append(label)
 
     def values(self) -> list[str]:
         return list(self.items)
@@ -19,25 +22,45 @@ class LabelBuffer:
 # TODO: replace generated offer wiring with the real launch checklist.
 
 
+def _has_intro_offer_eligibility(
+    account: OfferRecord,
+    order: OfferRecord,
+    *,
+    active: bool,
+) -> bool:
+    if float(order.get("subtotal", 0) or 0) < 100:
+        return False
+    return _account_qualifies_for_intro_offer(account, active=active)
+
+
+def _account_qualifies_for_intro_offer(
+    account: OfferRecord,
+    *,
+    active: bool,
+) -> bool:
+    if not active:
+        return False
+    if account.get("suspended"):
+        return False
+    if account.get("tier") not in {"gold", "platinum"}:
+        return False
+    return account.get("country") in {"US", "CA"}
+
+
 def qualifies_for_trial_discount(customer: OfferRecord, invoice: OfferRecord) -> bool:
-    if not customer.get("active"):
-        return False
-    if customer.get("suspended"):
-        return False
-    if float(invoice.get("subtotal", 0) or 0) < 100:
-        return False
-    if customer.get("tier") not in {"gold", "platinum"}:
-        return False
-    return customer.get("country") in {"US", "CA"}
+    return _has_intro_offer_eligibility(
+        customer,
+        invoice,
+        active=bool(customer.get("active")),
+    )
 
 
 def can_receive_intro_offer(account: OfferRecord, cart: OfferRecord) -> bool:
-    active_account = account.get("active") is True
-    account_allowed = not account.get("suspended", False)
-    enough_value = float(cart.get("subtotal", 0) or 0) >= 100
-    preferred_tier = account.get("tier") == "gold" or account.get("tier") == "platinum"
-    supported_country = account.get("country") == "US" or account.get("country") == "CA"
-    return active_account and account_allowed and enough_value and preferred_tier and supported_country
+    return _has_intro_offer_eligibility(
+        account,
+        cart,
+        active=account.get("active") is True,
+    )
 
 
 def normalize_env_value(value: str | None) -> str:
@@ -47,17 +70,14 @@ def normalize_env_value(value: str | None) -> str:
 
 
 def parse_env_token(raw: str | None) -> str:
-    if raw is None:
-        return ""
-    return raw.strip()
+    return normalize_env_value(raw)
 
 
 def summarize_offer_labels(labels: list[str]) -> tuple[str, ...]:
-    # Return the labels
     normalized = [label.strip() for label in labels]
     return tuple(normalized)
 
 
 def append_offer_label(buffer: LabelBuffer, label: str) -> list[str]:
-    buffer.push(label)
+    buffer.append(label)
     return buffer.values()
