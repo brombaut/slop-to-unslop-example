@@ -53,19 +53,37 @@ tools:
 
 steps:
   - name: Analyze base commit
+    env:
+      AISLOP_LLM_PROVIDER: ${{ secrets.AISLOP_LLM_PROVIDER || vars.AISLOP_LLM_PROVIDER || 'openai-compatible' }}
+      AISLOP_LLM_API_KEY: ${{ secrets.AISLOP_LLM_API_KEY }}
+      AISLOP_LLM_MODEL: ${{ secrets.AISLOP_LLM_MODEL || vars.AISLOP_LLM_MODEL }}
+      AISLOP_LLM_BASE_URL: ${{ secrets.AISLOP_LLM_BASE_URL || vars.AISLOP_LLM_BASE_URL }}
+      AISLOP_LLM_ENDPOINT_URL: ${{ secrets.AISLOP_LLM_ENDPOINT_URL || vars.AISLOP_LLM_ENDPOINT_URL }}
+      AISLOP_LLM_TIMEOUT: ${{ secrets.AISLOP_LLM_TIMEOUT || vars.AISLOP_LLM_TIMEOUT }}
     run: |
       set -euo pipefail
       python analyzer/analyze.py \
         --output /tmp/repo-analysis/output/base \
-        base
+        base \
+        --enable-llm-review \
+        --llm-max-candidates 2
 
   - name: Analyze head commit
+    env:
+      AISLOP_LLM_PROVIDER: ${{ secrets.AISLOP_LLM_PROVIDER || vars.AISLOP_LLM_PROVIDER || 'openai-compatible' }}
+      AISLOP_LLM_API_KEY: ${{ secrets.AISLOP_LLM_API_KEY }}
+      AISLOP_LLM_MODEL: ${{ secrets.AISLOP_LLM_MODEL || vars.AISLOP_LLM_MODEL }}
+      AISLOP_LLM_BASE_URL: ${{ secrets.AISLOP_LLM_BASE_URL || vars.AISLOP_LLM_BASE_URL }}
+      AISLOP_LLM_ENDPOINT_URL: ${{ secrets.AISLOP_LLM_ENDPOINT_URL || vars.AISLOP_LLM_ENDPOINT_URL }}
+      AISLOP_LLM_TIMEOUT: ${{ secrets.AISLOP_LLM_TIMEOUT || vars.AISLOP_LLM_TIMEOUT }}
     run: |
       set -euo pipefail
       python analyzer/analyze.py \
         --skip-build \
         --output /tmp/repo-analysis/output/head \
-        head
+        head \
+        --enable-llm-review \
+        --llm-max-candidates 2
 
   - name: Build introduced diagnostics report
     run: |
