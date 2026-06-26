@@ -1,6 +1,6 @@
 ---
-name: AI Slop Issue Reporter
-description: Scan PR base/head and create GitHub issues for AI Slop diagnostics introduced by the PR.
+name: Code Quality Issue Reporter
+description: Scan PR base/head and create one GitHub issue summarizing AI Slop diagnostics and PyExamine findings introduced by the PR.
 
 on:
   pull_request:
@@ -112,72 +112,34 @@ safe-outputs:
   mentions: false
   allowed-github-references: []
   create-issue:
-    title-prefix: "[AI Slop] "
-    max: 11
+    title-prefix: "[Code Quality] "
+    max: 1
     deduplicate-by-title: true
     expires: 30
 ---
 
-# AI Slop PR Issue Reporter
+# Code Quality PR Issue Reporter
 
-You are creating GitHub issues for AI Slop diagnostics introduced by this pull
-request.
+You are creating one GitHub issue that summarizes the AI Slop diagnostics and
+PyExamine findings introduced by this pull request.
 
 Read `/tmp/gh-aw/agent/introduced-diagnostics.json`.
 
-If the file is missing, invalid, empty, or contains no introduced diagnostics,
-do not create issues. Finish without visible GitHub writes.
+If the file is missing, invalid, empty, or contains no introduced diagnostics or
+findings, do not create an issue. Finish without visible GitHub writes.
 
-For each item in `introduced_diagnostics`, create one GitHub issue using the
-`create_issue` safe output. Create at most 10 per-diagnostic issues. Preserve
-the order from the JSON file.
+Create exactly one issue using the `create_issue` safe output.
 
-Each issue title must be stable and deterministic:
-
-`<rule> in <filePath>:<line> from PR #${{ github.event.pull_request.number }}`
-
-Each issue body must include these sections:
-
-## Summary
-
-A short explanation that this pull request introduced the diagnostic.
-
-## Location
-
-- PR: #${{ github.event.pull_request.number }}
-- File: `<filePath>`
-- Line: `<line>`
-- Rule: `<rule>`
-- Source: `<analysisSource>`
-
-## Diagnostic Message
-
-The diagnostic message from the analyzer.
-
-## Related Locations
-
-Include related locations when `relatedLocations` is present and non-empty. If
-none are present, write `None`.
-
-## Suggested Follow-Up
-
-One concise, actionable recommendation based on the diagnostic fields. Prefer
-the diagnostic `help` field when it is present. Do not invent source code
-changes that are not supported by the diagnostic.
-
-After creating the per-diagnostic issues, create exactly one summary issue using
-the `create_issue` safe output.
-
-The summary issue title must be stable and deterministic:
+The issue title must be stable and deterministic:
 
 `Summary for PR #${{ github.event.pull_request.number }}`
 
-The summary issue body must include these sections:
+The issue body must include these sections:
 
 ## Summary
 
-A short explanation that this issue collects the AI Slop diagnostics introduced
-by this pull request.
+A short explanation that this issue collects all AI Slop diagnostics and
+PyExamine findings introduced by this pull request in one report.
 
 ## Pull Request
 
@@ -185,30 +147,50 @@ by this pull request.
 - Base SHA: `${{ github.event.pull_request.base.sha }}`
 - Head SHA: `${{ github.event.pull_request.head.sha }}`
 
-## Introduced Diagnostics
+## Introduced Findings
 
-A markdown table with one row per per-diagnostic issue created in this run. The
-columns must be:
+A markdown table with one row per introduced diagnostic or finding. Preserve the
+order from the JSON file. The columns must be:
 
-- Issue Title
 - Rule
 - File
 - Line
 - Source
+- Message
 
-The Issue Title column must contain the exact deterministic title used for the
-per-diagnostic issue, not an invented issue number.
+Keep messages concise enough that the table remains readable. Do not omit
+diagnostics or findings from this table.
 
-## Counts By Rule
+## Detailed Findings
 
-A markdown table with one row per rule and the number of introduced diagnostics
-for that rule.
+For each item in `introduced_diagnostics`, include a short subsection using this
+heading format:
+
+`### <rule> in <filePath>:<line>`
+
+Each subsection must include:
+
+- Source: `<analysisSource>`
+- Message: the diagnostic or finding message from the analyzer
+- Related locations: include related locations when `relatedLocations` is
+  present and non-empty. If none are present, write `None`.
+- Suggested follow-up: one concise, actionable recommendation based on the
+  diagnostic or finding fields. Prefer the `help` field when it is present.
+  Do not invent source code changes that are not supported by the diagnostic or
+  finding.
+
+## Counts By Source And Rule
+
+A markdown table with one row per source/rule pair and the number of introduced
+diagnostics or findings for that pair.
 
 ## Notes
 
-State that the individual issue titles are deterministic so repeated workflow
-runs can deduplicate by title.
+State that this issue title is deterministic so repeated workflow runs can
+deduplicate by title.
 
-Use only the diagnostics in `/tmp/gh-aw/agent/introduced-diagnostics.json`.
-Do not create issues for existing base diagnostics, resolved diagnostics,
-code-health regressions, PyExamine findings, or general recommendations.
+Use only the diagnostics and findings in
+`/tmp/gh-aw/agent/introduced-diagnostics.json`. Do not create issues for
+existing base diagnostics or findings, resolved diagnostics or findings,
+code-health regressions, items outside that JSON file, or general
+recommendations.
