@@ -1,6 +1,6 @@
 ---
 name: Code Quality PR Agentic Fix
-description: Scan PR base/head, fix introduced AI Slop and PyExamine findings, merge patches, and open a cleanup PR into the original PR head branch.
+description: Scan PR base/head, report introduced findings, fix introduced AI Slop and PyExamine findings, merge patches, and open a cleanup PR into the original PR head branch when a non-empty generated fix applies cleanly.
 
 on:
   pull_request:
@@ -45,6 +45,11 @@ safe-outputs:
   threat-detection: false
   mentions: false
   allowed-github-references: []
+  create-issue:
+    title-prefix: "[Code Quality] "
+    max: 1
+    deduplicate-by-title: true
+    expires: 30
   create-pull-request:
     title-prefix: "Apply code quality fixes"
     draft: false
@@ -196,6 +201,7 @@ steps:
         --output /tmp/repo-analysis/report.md \
         --introduced-json /tmp/repo-analysis/introduced-diagnostics.json
 
+      cat /tmp/repo-analysis/introduced-diagnostics.json > /tmp/gh-aw/agent/introduced-diagnostics.json
       cat /tmp/repo-analysis/report.md >> "$GITHUB_STEP_SUMMARY"
 
   - name: Build introduced-only fix evidence
@@ -396,8 +402,18 @@ steps:
 
   - name: Create cleanup PR body
     if: env.SHOULD_CREATE_PR == 'true'
+    env:
+      ORIGINAL_PR_NUMBER: ${{ github.event.pull_request.number }}
+      ORIGINAL_PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      ORIGINAL_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      ORIGINAL_PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+      WORKFLOW_RUN_ID: ${{ github.run_id }}
     run: |
       set -euo pipefail
+
+      cleanup_branch="code-quality/agentic-fix-pr-${ORIGINAL_PR_NUMBER}-${WORKFLOW_RUN_ID}"
+      git switch -c "$cleanup_branch"
+
       python - <<'PY'
       import json
       import os
@@ -414,16 +430,22 @@ steps:
           value = payload.get(name, 0)
           return value if isinstance(value, int) else 0
 
-      title = "Apply code quality fixes for PR #${{ github.event.pull_request.number }}"
-      branch = "code-quality/agentic-fix-pr-${{ github.event.pull_request.number }}-${{ github.run_id }}"
+      pr_number = os.environ["ORIGINAL_PR_NUMBER"]
+      base_sha = os.environ["ORIGINAL_PR_BASE_SHA"]
+      head_sha = os.environ["ORIGINAL_PR_HEAD_SHA"]
+      head_ref = os.environ["ORIGINAL_PR_HEAD_REF"]
+      run_id = os.environ["WORKFLOW_RUN_ID"]
+
+      title = f"Apply code quality fixes for PR #{pr_number}"
+      branch = f"code-quality/agentic-fix-pr-{pr_number}-{run_id}"
       body = f"""This PR applies generated code quality fixes for the original pull request.
 
       ## Original Pull Request
 
-      - PR: #${{ github.event.pull_request.number }}
-      - Base SHA: `${{ github.event.pull_request.base.sha }}`
-      - Head SHA analyzed: `${{ github.event.pull_request.head.sha }}`
-      - Target branch: `${{ github.event.pull_request.head.ref }}`
+      - PR: #{pr_number}
+      - Base SHA: `{base_sha}`
+      - Head SHA analyzed: `{head_sha}`
+      - Target branch: `{head_ref}`
 
       ## Remediation Summary
 
@@ -460,7 +482,7 @@ steps:
         echo
         echo "Prepared a cleanup PR request for the safe-outputs create-pull-request handler."
         echo
-        echo "The cleanup PR will target \`${{ github.event.pull_request.head.ref }}\`, the source branch of PR #${{ github.event.pull_request.number }}."
+        echo "The cleanup PR will target \`${ORIGINAL_PR_HEAD_REF}\`, the source branch of PR #${ORIGINAL_PR_NUMBER}."
       } >> "$GITHUB_STEP_SUMMARY"
 
   - name: Upload code quality remediation artifacts
@@ -478,14 +500,85 @@ steps:
 # Code Quality PR Agentic Fix
 
 The deterministic workflow steps have already scanned the PR base and head,
-filtered introduced findings, run agentic fix generation, merged eligible
-patches, and applied the combined diff to the workspace when a reviewable patch
-was available.
+filtered introduced findings, written the introduced diagnostics report, run
+agentic fix generation, merged eligible patches, and applied the combined diff
+to the workspace when a reviewable patch was available.
 
-Read `/tmp/gh-aw/agent/create-pr-request.json`.
+First, read `/tmp/gh-aw/agent/introduced-diagnostics.json`.
 
-If the file is missing, invalid, or has `shouldCreatePr` set to anything other
-than `true`, do not call any safe output. Finish without visible GitHub writes.
+If the introduced diagnostics file exists, is valid, and contains introduced
+diagnostics or findings, create exactly one issue using the `create_issue` safe
+output.
+
+The issue title must be stable and deterministic:
+
+`Summary for PR #${{ github.event.pull_request.number }}`
+
+The issue body must include these sections:
+
+## Summary
+
+A short explanation that this issue collects all AI Slop diagnostics and
+PyExamine findings introduced by this pull request in one report.
+
+## Pull Request
+
+- PR: #${{ github.event.pull_request.number }}
+- Base SHA: `${{ github.event.pull_request.base.sha }}`
+- Head SHA: `${{ github.event.pull_request.head.sha }}`
+
+## Introduced Findings
+
+A markdown table with one row per introduced diagnostic or finding. Preserve the
+order from the JSON file. The columns must be:
+
+- Rule
+- File
+- Line
+- Source
+- Message
+
+Keep messages concise enough that the table remains readable. Do not omit
+diagnostics or findings from this table.
+
+## Detailed Findings
+
+For each item in `introduced_diagnostics`, include a short subsection using this
+heading format:
+
+`### <rule> in <filePath>:<line>`
+
+Each subsection must include:
+
+- Source: `<analysisSource>`
+- Message: the diagnostic or finding message from the analyzer
+- Related locations: include related locations when `relatedLocations` is
+  present and non-empty. If none are present, write `None`.
+- Suggested follow-up: one concise, actionable recommendation based on the
+  diagnostic or finding fields. Prefer the `help` field when it is present.
+  Do not invent source code changes that are not supported by the diagnostic or
+  finding.
+
+## Counts By Source And Rule
+
+A markdown table with one row per source/rule pair and the number of introduced
+diagnostics or findings for that pair.
+
+## Notes
+
+State that this issue title is deterministic so repeated workflow runs can
+deduplicate by title.
+
+Use only the diagnostics and findings in
+`/tmp/gh-aw/agent/introduced-diagnostics.json`. Do not create issues for
+existing base diagnostics or findings, resolved diagnostics or findings,
+code-health regressions, items outside that JSON file, or general
+recommendations.
+
+Next, read `/tmp/gh-aw/agent/create-pr-request.json`.
+
+If the create-PR request file is missing, invalid, or has `shouldCreatePr` set
+to anything other than `true`, do not call `create_pull_request`.
 
 If `shouldCreatePr` is `true`, call `create_pull_request` exactly once using
 only these fields from the JSON file:
@@ -495,7 +588,7 @@ only these fields from the JSON file:
 - `branch`
 
 Do not edit repository files, create additional branches with git commands,
-open additional pull requests, create issues, comment on the original pull
-request, or change the prepared title/body/branch. The pull request base branch
-is configured in `safe-outputs.create-pull-request` and targets the original PR
-head branch.
+open additional pull requests, comment on the original pull request, or change
+the prepared title/body/branch. Apart from the single scan issue described
+above, do not create issues. The pull request base branch is configured in
+`safe-outputs.create-pull-request` and targets the original PR head branch.
