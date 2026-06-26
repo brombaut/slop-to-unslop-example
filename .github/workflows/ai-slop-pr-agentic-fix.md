@@ -411,6 +411,10 @@ steps:
 
       cleanup_branch="code-quality/agentic-fix-pr-${ORIGINAL_PR_NUMBER}-${WORKFLOW_RUN_ID}"
       git switch -c "$cleanup_branch"
+      git config user.name "github-actions[bot]"
+      git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      git add -A
+      git commit -m "Apply generated code quality fixes for PR #${ORIGINAL_PR_NUMBER}"
 
       python - <<'PY'
       import json
