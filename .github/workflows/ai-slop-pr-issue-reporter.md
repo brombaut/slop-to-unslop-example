@@ -90,6 +90,7 @@ steps:
       cat /tmp/gh-aw/agent/report.md >> "$GITHUB_STEP_SUMMARY"
 
 safe-outputs:
+  threat-detection: false
   mentions: false
   allowed-github-references: []
   create-issue:
