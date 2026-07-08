@@ -464,6 +464,7 @@ steps:
       ## Original Pull Request
 
       - PR: #{pr_number}
+      - Findings report: #aw_findings
       - Base SHA: `{base_sha}`
       - Head SHA analyzed: `{head_sha}`
       - Target branch: `{head_ref}`
