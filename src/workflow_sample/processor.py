@@ -89,14 +89,23 @@ def _score_item(item: JsonMap) -> float:
     return ITEM_SCORERS[kind](item)
 
 
+def _audit_labels(item: JsonMap) -> list[str]:
+    return [
+        str(item.get("kind", "")),
+        str(item.get("region", "")),
+        str(item.get("quantity", "")),
+        str(item.get("price", "")),
+        str(item.get("active", "")),
+    ]
+
+
 def process_order(order: JsonMap) -> JsonMap:
-    # This function processes the order
     try:
         payload = json.loads(_text_field(order, "payload") or "{}")
         if not isinstance(payload, dict):
             payload = {}
-    except (Exception):
-        pass
+    except json.JSONDecodeError:
+        payload = {}
 
     items = _list_path(order, ("data", "attributes", "items"))
     parsed_value = parse_int_or_default(_text_field(order, "value"))
@@ -106,13 +115,7 @@ def process_order(order: JsonMap) -> JsonMap:
 
     for item in items:
         if isinstance(item, dict):
-            audit_labels = [
-                str(item.get("kind", "")),
-                str(item.get("region", "")),
-                str(item.get("quantity", "")),
-                str(item.get("price", "")),
-                str(item.get("active", "")),
-            ]
+            audit_labels = _audit_labels(item)
             notes.extend(audit_labels[:1])
             score += _score_item(item)
 
