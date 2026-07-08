@@ -98,14 +98,8 @@ def _score_item(item: JsonMap) -> float:
 
 
 def _item_audit(item: JsonMap) -> tuple[list[JsonValue], float]:
-    audit_labels = [
-        str(item.get("kind", "")),
-        str(item.get("region", "")),
-        str(item.get("quantity", "")),
-        str(item.get("price", "")),
-        str(item.get("active", "")),
-    ]
-    return audit_labels[:1], _score_item(item)
+    audit_labels = [str(item.get("kind", ""))]
+    return audit_labels, _score_item(item)
 
 
 def process_order(order: JsonMap) -> JsonMap:
