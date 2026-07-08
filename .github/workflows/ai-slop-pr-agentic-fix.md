@@ -48,6 +48,7 @@ safe-outputs:
   create-issue:
     title-prefix: "[Code Quality] "
     max: 1
+  create-pull-request-review-comment:
   create-pull-request:
     title-prefix: "Apply code quality fixes"
     draft: false
@@ -525,6 +526,22 @@ The issue title must be:
 The issue body must be the exact contents of
 `/tmp/gh-aw/agent/introduced-findings-issue.md`.
 
+Set the issue `temporary_id` to `#aw_findings`.
+
+Then create one inline pull request review comment for each item in
+`introduced_diagnostics` using the `create_pull_request_review_comment` safe
+output.
+
+Each review comment must use the item's `filePath` as `path`, the item's `line`
+as `line`, and a very brief body in this format:
+
+`<Source>: <Rule>. See full report: #aw_findings`
+
+Use the source label from `analysisSource`, using `AI Slop` for
+`deterministic_static_analysis` and `llm_review`, `PyExamine` for `pyexamine`,
+and `Finding` otherwise. Do not include the full diagnostic message in the
+review comment.
+
 Use only the diagnostics and findings in
 `/tmp/gh-aw/agent/introduced-diagnostics.json`. Do not create issues for
 existing base diagnostics or findings, resolved diagnostics or findings,
@@ -544,7 +561,8 @@ only these fields from the JSON file:
 - `branch`
 
 Do not edit repository files, create additional branches with git commands,
-open additional pull requests, comment on the original pull request, or change
-the prepared title/body/branch. Apart from the single scan issue described
-above, do not create issues. The pull request base branch is configured in
-`safe-outputs.create-pull-request` and targets the original PR head branch.
+open additional pull requests, create comments other than the inline review
+comments described above, or change the prepared title/body/branch. Apart from
+the single scan issue described above, do not create issues. The pull request
+base branch is configured in `safe-outputs.create-pull-request` and targets the
+original PR head branch.
