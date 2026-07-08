@@ -1,19 +1,43 @@
-# Repo Analysis Workflow Test
+# Slop To Unslop Example
 
-Small Python repository for testing the repo-analysis PR workflow.
+Small Python repository for testing the repo-analysis PR remediation workflow.
 
-The workflow in `.github/workflows/repo-health-pr-analysis.yml` checks out a PR
-base commit and head commit, checks out the analyzer repository, runs the
-analyzer on both revisions, compares the JSON outputs, writes a markdown report
-to the GitHub Actions step summary, and uploads raw artifacts.
+The active workflow is a GitHub Agentic Workflow:
 
-The source files intentionally contain code-health and AI-slop patterns so the
-analyzer has findings to report.
+- Source: `.github/workflows/ai-slop-pr-agentic-fix.md`
+- Compiled workflow: `.github/workflows/ai-slop-pr-agentic-fix.lock.yml`
 
-There is also a gh-aw draft in `docs/repo-health-pr-analysis-gh-aw-draft.md`.
-It is documentation only for now. The first runnable POC uses plain GitHub
-Actions because the compiled gh-aw form still performs agent/Copilot setup even
-when the deterministic steps emit `noop`.
+GitHub Actions runs the compiled `.lock.yml` file. Edit the `.md` source file,
+then recompile it before committing workflow changes.
+
+## Workflow Behavior
+
+On pull requests that change Python project files, the workflow:
+
+1. Checks out the PR base revision, PR head revision, and a patch target branch.
+2. Checks out the analyzer repository from `PGCodeLLM/code-health`.
+3. Runs the repo analyzer on base and head with AI Slop LLM review enabled.
+4. Compares the reports and keeps only findings introduced by the PR.
+5. Builds remediation evidence for introduced AI Slop and PyExamine findings.
+6. Runs the analyzer's agentic fixer with Codex to generate reviewable patches.
+7. Merges eligible patches and opens a cleanup PR back into the original PR
+   branch when a non-empty fix applies cleanly.
+
+The workflow uses safe gh-aw outputs for repository writes. It does not push
+directly to the original feature branch.
+
+## Compiling The Workflow
+
+Install and authenticate `gh-aw` as described by the GitHub Agentic Workflows
+project. From this repository, compile the workflow with:
+
+```bash
+gh aw compile
+```
+
+This updates `.github/workflows/ai-slop-pr-agentic-fix.lock.yml` from
+`.github/workflows/ai-slop-pr-agentic-fix.md`. Commit both files whenever the
+workflow source changes.
 
 ## Analyzer Checkout
 
@@ -41,7 +65,8 @@ python ../repo-analysis-prototype/analyze.py \
 ## PR Test Shape
 
 1. Push this repository to GitHub.
-2. Commit the current files to `main`.
-3. Create a branch that makes `src/workflow_sample/processor.py` worse.
-4. Open a pull request.
-5. Inspect the workflow step summary and uploaded artifact.
+2. Keep `main` clean of analyzer findings.
+3. Open a pull request from a branch that introduces AI Slop or PyExamine
+   findings.
+4. Inspect the workflow step summary, uploaded artifacts, and generated cleanup
+   PR.
