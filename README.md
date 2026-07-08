@@ -18,9 +18,11 @@ On pull requests that change Python project files, the workflow:
 2. Checks out the analyzer repository from `PGCodeLLM/code-health`.
 3. Runs the repo analyzer on base and head with AI Slop LLM review enabled.
 4. Compares the reports and keeps only findings introduced by the PR.
-5. Builds remediation evidence for introduced AI Slop and PyExamine findings.
-6. Runs the analyzer's agentic fixer with Codex to generate reviewable patches.
-7. Merges eligible patches and opens a cleanup PR back into the original PR
+5. Opens one issue report and brief inline PR review comments for introduced
+   AI Slop and PyExamine findings.
+6. Builds remediation evidence for introduced AI Slop and PyExamine findings.
+7. Runs the analyzer's agentic fixer with Codex to generate reviewable patches.
+8. Merges eligible patches and opens a cleanup PR back into the original PR
    branch when a non-empty fix applies cleanly.
 
 The workflow uses safe gh-aw outputs for repository writes. It does not push
