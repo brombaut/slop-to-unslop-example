@@ -16,7 +16,7 @@
     },
     "engines": {
       "ai-slop": {
-        "elapsed": 13166,
+        "elapsed": 14578,
         "issues": 0,
         "llmReview": {
           "candidates": 3,
@@ -27,9 +27,9 @@
           "reviewed": 3,
           "skipped": 0,
           "usage": {
-            "completionTokens": 533,
-            "promptTokens": 3169,
-            "totalTokens": 3702
+            "completionTokens": 467,
+            "promptTokens": 3630,
+            "totalTokens": 4097
           }
         },
         "skipped": false
@@ -45,10 +45,8 @@
     "score": 100,
     "scoreable": true,
     "summary": {
-      "elapsed": "13.2s",
-      "errors": 0,
-      "files": 3,
-      "warnings": 0
+      "elapsed": "14.6s",
+      "files": 3
     },
     "version": "python-aislop-engine"
   },
@@ -67,12 +65,31 @@
       "until": null
     }
   },
+  "classic_smells": {
+    "enabled": true,
+    "findings": [],
+    "schemaVersion": "1",
+    "summary": {
+      "architectural": 0,
+      "byName": {},
+      "code": 0,
+      "structural": 0,
+      "total": 0
+    },
+    "tool": "Classic Smells",
+    "types": [
+      "code",
+      "architectural",
+      "structural"
+    ],
+    "version": "0.2.2"
+  },
   "hotspots": [
     {
-      "activity_score": 0.2,
-      "code_line_count": 98,
+      "activity_score": 0.23529411764705882,
+      "code_line_count": 99,
       "formula": "activity_score * size_score",
-      "hotspot_score": 0.2,
+      "hotspot_score": 0.23529411764705882,
       "path": "src/workflow_sample/processor.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
@@ -81,14 +98,14 @@
         "low revision activity",
         "large Python file"
       ],
-      "revision_count": 3,
+      "revision_count": 4,
       "size_score": 1.0
     },
     {
-      "activity_score": 0.13333333333333333,
+      "activity_score": 0.11764705882352941,
       "code_line_count": 30,
       "formula": "activity_score * size_score",
-      "hotspot_score": 0.04081632653061225,
+      "hotspot_score": 0.035650623885918005,
       "path": "tests/test_processor.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
@@ -98,13 +115,13 @@
         "small Python file"
       ],
       "revision_count": 2,
-      "size_score": 0.30612244897959184
+      "size_score": 0.30303030303030304
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.058823529411764705,
       "code_line_count": 2,
       "formula": "activity_score * size_score",
-      "hotspot_score": 0.0013605442176870747,
+      "hotspot_score": 0.0011883541295306002,
       "path": "src/workflow_sample/__init__.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
@@ -114,7 +131,7 @@
         "small Python file"
       ],
       "revision_count": 1,
-      "size_score": 0.02040816326530612
+      "size_score": 0.020202020202020204
     },
     {
       "activity_score": 1.0,
@@ -129,11 +146,11 @@
         "high revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 15,
+      "revision_count": 17,
       "size_score": 0.0
     },
     {
-      "activity_score": 1.0,
+      "activity_score": 0.9411764705882353,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -145,11 +162,11 @@
         "high revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 15,
+      "revision_count": 16,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.7333333333333333,
+      "activity_score": 0.6470588235294118,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -165,7 +182,7 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.7333333333333333,
+      "activity_score": 0.6470588235294118,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -181,7 +198,7 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.3333333333333333,
+      "activity_score": 0.29411764705882354,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -197,7 +214,7 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.3333333333333333,
+      "activity_score": 0.29411764705882354,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -213,7 +230,7 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.2,
+      "activity_score": 0.23529411764705882,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -225,15 +242,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 3,
+      "revision_count": 4,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.13333333333333333,
+      "activity_score": 0.17647058823529413,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".github/workflows/ai-slop-pr-analysis.yml",
+      "path": "demo_artifacts/repo_codehealth_analysis_0_main.json",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 11,
@@ -241,15 +258,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 2,
+      "revision_count": 3,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.13333333333333333,
+      "activity_score": 0.17647058823529413,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": "docs/repo-health-pr-analysis-gh-aw-draft.md",
+      "path": "demo_artifacts/repo_codehealth_analysis_1_feature_sloppy.json",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 12,
@@ -257,15 +274,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 2,
+      "revision_count": 3,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.13333333333333333,
+      "activity_score": 0.17647058823529413,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": "src/workflow_sample/reporting.py",
+      "path": "demo_artifacts/repo_codehealth_analysis_2_feature_unslopped.json",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 13,
@@ -273,15 +290,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 2,
+      "revision_count": 3,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.11764705882352941,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".gitattributes",
+      "path": ".github/workflows/ai-slop-pr-analysis.yml",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 14,
@@ -289,15 +306,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 1,
+      "revision_count": 2,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.11764705882352941,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".github/aw/actions-lock.json",
+      "path": "docs/repo-health-pr-analysis-gh-aw-draft.md",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 15,
@@ -305,15 +322,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 1,
+      "revision_count": 2,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.11764705882352941,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".github/workflows/{repo-health-pr-analysis.yml => ai-slop-pr-analysis.yml}",
+      "path": "src/workflow_sample/reporting.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 16,
@@ -321,15 +338,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 1,
+      "revision_count": 2,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.058823529411764705,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".gitignore",
+      "path": ".gitattributes",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 17,
@@ -341,11 +358,11 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.058823529411764705,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": "pyproject.toml",
+      "path": ".github/aw/actions-lock.json",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 18,
@@ -355,47 +372,79 @@
       ],
       "revision_count": 1,
       "size_score": 0.0
+    },
+    {
+      "activity_score": 0.058823529411764705,
+      "code_line_count": 0,
+      "formula": "activity_score * size_score",
+      "hotspot_score": 0.0,
+      "path": ".github/workflows/{repo-health-pr-analysis.yml => ai-slop-pr-analysis.yml}",
+      "path_format": "posix",
+      "path_kind": "repository_relative",
+      "rank": 19,
+      "reasons": [
+        "low revision activity",
+        "no Python code-size metric available"
+      ],
+      "revision_count": 1,
+      "size_score": 0.0
+    },
+    {
+      "activity_score": 0.058823529411764705,
+      "code_line_count": 0,
+      "formula": "activity_score * size_score",
+      "hotspot_score": 0.0,
+      "path": ".gitignore",
+      "path_format": "posix",
+      "path_kind": "repository_relative",
+      "rank": 20,
+      "reasons": [
+        "low revision activity",
+        "no Python code-size metric available"
+      ],
+      "revision_count": 1,
+      "size_score": 0.0
+    },
+    {
+      "activity_score": 0.058823529411764705,
+      "code_line_count": 0,
+      "formula": "activity_score * size_score",
+      "hotspot_score": 0.0,
+      "path": "demo_artifacts/slop-to-unslop-demo.mp4",
+      "path_format": "posix",
+      "path_kind": "repository_relative",
+      "rank": 21,
+      "reasons": [
+        "low revision activity",
+        "no Python code-size metric available"
+      ],
+      "revision_count": 1,
+      "size_score": 0.0
+    },
+    {
+      "activity_score": 0.058823529411764705,
+      "code_line_count": 0,
+      "formula": "activity_score * size_score",
+      "hotspot_score": 0.0,
+      "path": "pyproject.toml",
+      "path_format": "posix",
+      "path_kind": "repository_relative",
+      "rank": 22,
+      "reasons": [
+        "low revision activity",
+        "no Python code-size metric available"
+      ],
+      "revision_count": 1,
+      "size_score": 0.0
     }
   ],
-  "classic_smells": {
-    "enabled": true,
-    "findings": [
-      {
-        "description": "Method '_text_field' called in 4 different contexts across 6 locations in src/workflow_sample/processor.py",
-        "diagnosticId": "pyexamine:potential-shotgun-surgery:738cf508d4c8",
-        "filePath": "src/workflow_sample/processor.py",
-        "line": 43,
-        "moduleClass": "_text_field",
-        "name": "Potential Shotgun Surgery",
-        "rule": "pyexamine/potential-shotgun-surgery",
-        "type": "code"
-      }
-    ],
-    "schemaVersion": "1",
-    "summary": {
-      "architectural": 0,
-      "byName": {
-        "Potential Shotgun Surgery": 1
-      },
-      "code": 1,
-      "structural": 0,
-      "total": 1
-    },
-    "tool": "Classic Smells",
-    "types": [
-      "code",
-      "architectural",
-      "structural"
-    ],
-    "version": "0.2.2"
-  },
   "repository": {
     "analysis_window": {
       "description": "Entire available Git history.",
       "since": null,
       "until": null
     },
-    "analyzed_at": "2026-07-08T16:07:55.866266Z",
+    "analyzed_at": "2026-07-08T19:46:49.465321Z",
     "path": "/repo",
     "since": null,
     "until": null
@@ -418,12 +467,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 1,
-                  "hotspot_activity_weight_normalized": 0.06666666666666667,
+                  "hotspot_activity_weight_normalized": 0.058823529411764705,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 1,
-                  "revision_count_normalized": 0.06666666666666667,
+                  "revision_count_normalized": 0.058823529411764705,
                   "scores": {
                     "health": {
                       "factors": {
@@ -507,12 +556,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 5,
-                  "hotspot_activity_weight_normalized": 0.3333333333333333,
+                  "hotspot_activity_weight_normalized": 0.29411764705882354,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 5,
-                  "revision_count_normalized": 0.3333333333333333,
+                  "revision_count_normalized": 0.29411764705882354,
                   "scores": {
                     "health": {
                       "factors": {
@@ -568,12 +617,12 @@
                     "incoming_dependency_count": 0,
                     "outgoing_dependency_count": 0
                   },
-                  "hotspot_activity_weight": 15,
+                  "hotspot_activity_weight": 17,
                   "hotspot_activity_weight_normalized": 1.0,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
-                  "revision_count": 15,
+                  "revision_count": 17,
                   "revision_count_normalized": 1.0,
                   "scores": {
                     "health": {
@@ -630,13 +679,13 @@
                     "incoming_dependency_count": 0,
                     "outgoing_dependency_count": 0
                   },
-                  "hotspot_activity_weight": 15,
-                  "hotspot_activity_weight_normalized": 1.0,
+                  "hotspot_activity_weight": 16,
+                  "hotspot_activity_weight_normalized": 0.9411764705882353,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
-                  "revision_count": 15,
-                  "revision_count_normalized": 1.0,
+                  "revision_count": 16,
+                  "revision_count_normalized": 0.9411764705882353,
                   "scores": {
                     "health": {
                       "factors": {
@@ -693,12 +742,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 2,
-                  "hotspot_activity_weight_normalized": 0.13333333333333333,
+                  "hotspot_activity_weight_normalized": 0.11764705882352941,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 2,
-                  "revision_count_normalized": 0.13333333333333333,
+                  "revision_count_normalized": 0.11764705882352941,
                   "scores": {
                     "health": {
                       "factors": {
@@ -755,12 +804,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 11,
-                  "hotspot_activity_weight_normalized": 0.7333333333333333,
+                  "hotspot_activity_weight_normalized": 0.6470588235294118,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 11,
-                  "revision_count_normalized": 0.7333333333333333,
+                  "revision_count_normalized": 0.6470588235294118,
                   "scores": {
                     "health": {
                       "factors": {
@@ -817,12 +866,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 11,
-                  "hotspot_activity_weight_normalized": 0.7333333333333333,
+                  "hotspot_activity_weight_normalized": 0.6470588235294118,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 11,
-                  "revision_count_normalized": 0.7333333333333333,
+                  "revision_count_normalized": 0.6470588235294118,
                   "scores": {
                     "health": {
                       "factors": {
@@ -879,12 +928,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 5,
-                  "hotspot_activity_weight_normalized": 0.3333333333333333,
+                  "hotspot_activity_weight_normalized": 0.29411764705882354,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 5,
-                  "revision_count_normalized": 0.3333333333333333,
+                  "revision_count_normalized": 0.29411764705882354,
                   "scores": {
                     "health": {
                       "factors": {
@@ -941,12 +990,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 1,
-                  "hotspot_activity_weight_normalized": 0.06666666666666667,
+                  "hotspot_activity_weight_normalized": 0.058823529411764705,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 1,
-                  "revision_count_normalized": 0.06666666666666667,
+                  "revision_count_normalized": 0.058823529411764705,
                   "scores": {
                     "health": {
                       "factors": {
@@ -1054,13 +1103,288 @@
                 "incoming_dependency_count": 0,
                 "outgoing_dependency_count": 0
               },
+              "hotspot_activity_weight": 3,
+              "hotspot_activity_weight_normalized": 0.17647058823529413,
+              "hotspot_score": 0.0,
+              "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
+              "hotspot_size_score": 0.0,
+              "revision_count": 3,
+              "revision_count_normalized": 0.17647058823529413,
+              "scores": {
+                "health": {
+                  "factors": {
+                    "file_size_health": 10.0,
+                    "function_health_available": false,
+                    "import_coupling_count": 0,
+                    "import_coupling_penalty": 0.0,
+                    "incoming_dependency_count": 0,
+                    "outgoing_dependency_count": 0
+                  },
+                  "formula": "file_size_health - import_coupling_penalty",
+                  "reasons": [
+                    "no functions detected by Lizard"
+                  ],
+                  "scale": "0_to_10",
+                  "score": 10.0
+                }
+              },
+              "static_analysis": {
+                "avg_function_complexity": 0.0,
+                "avg_function_nloc": 0.0,
+                "avg_nesting_depth": 0.0,
+                "boolean_operator_count": 0,
+                "class_count": 0,
+                "complex_conditional_count": 0,
+                "conditional_count": 0,
+                "function_count": 0,
+                "high_complexity_function_count": 0,
+                "large_function_count": 0,
+                "max_function_complexity": 0,
+                "max_function_nloc": 0,
+                "max_function_parameter_count": 0,
+                "max_nesting_depth": 0,
+                "top_level_function_count": 0
+              }
+            },
+            "name": "repo_codehealth_analysis_0_main.json",
+            "path": "demo_artifacts/repo_codehealth_analysis_0_main.json",
+            "path_format": "posix",
+            "path_kind": "repository_relative",
+            "symbols": {
+              "functions": []
+            }
+          },
+          {
+            "children": [],
+            "dependencies": [],
+            "kind": "file",
+            "language": null,
+            "metrics": {
+              "dependency_analysis": {
+                "import_coupling_count": 0,
+                "incoming_dependency_count": 0,
+                "outgoing_dependency_count": 0
+              },
+              "hotspot_activity_weight": 3,
+              "hotspot_activity_weight_normalized": 0.17647058823529413,
+              "hotspot_score": 0.0,
+              "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
+              "hotspot_size_score": 0.0,
+              "revision_count": 3,
+              "revision_count_normalized": 0.17647058823529413,
+              "scores": {
+                "health": {
+                  "factors": {
+                    "file_size_health": 10.0,
+                    "function_health_available": false,
+                    "import_coupling_count": 0,
+                    "import_coupling_penalty": 0.0,
+                    "incoming_dependency_count": 0,
+                    "outgoing_dependency_count": 0
+                  },
+                  "formula": "file_size_health - import_coupling_penalty",
+                  "reasons": [
+                    "no functions detected by Lizard"
+                  ],
+                  "scale": "0_to_10",
+                  "score": 10.0
+                }
+              },
+              "static_analysis": {
+                "avg_function_complexity": 0.0,
+                "avg_function_nloc": 0.0,
+                "avg_nesting_depth": 0.0,
+                "boolean_operator_count": 0,
+                "class_count": 0,
+                "complex_conditional_count": 0,
+                "conditional_count": 0,
+                "function_count": 0,
+                "high_complexity_function_count": 0,
+                "large_function_count": 0,
+                "max_function_complexity": 0,
+                "max_function_nloc": 0,
+                "max_function_parameter_count": 0,
+                "max_nesting_depth": 0,
+                "top_level_function_count": 0
+              }
+            },
+            "name": "repo_codehealth_analysis_1_feature_sloppy.json",
+            "path": "demo_artifacts/repo_codehealth_analysis_1_feature_sloppy.json",
+            "path_format": "posix",
+            "path_kind": "repository_relative",
+            "symbols": {
+              "functions": []
+            }
+          },
+          {
+            "children": [],
+            "dependencies": [],
+            "kind": "file",
+            "language": null,
+            "metrics": {
+              "dependency_analysis": {
+                "import_coupling_count": 0,
+                "incoming_dependency_count": 0,
+                "outgoing_dependency_count": 0
+              },
+              "hotspot_activity_weight": 3,
+              "hotspot_activity_weight_normalized": 0.17647058823529413,
+              "hotspot_score": 0.0,
+              "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
+              "hotspot_size_score": 0.0,
+              "revision_count": 3,
+              "revision_count_normalized": 0.17647058823529413,
+              "scores": {
+                "health": {
+                  "factors": {
+                    "file_size_health": 10.0,
+                    "function_health_available": false,
+                    "import_coupling_count": 0,
+                    "import_coupling_penalty": 0.0,
+                    "incoming_dependency_count": 0,
+                    "outgoing_dependency_count": 0
+                  },
+                  "formula": "file_size_health - import_coupling_penalty",
+                  "reasons": [
+                    "no functions detected by Lizard"
+                  ],
+                  "scale": "0_to_10",
+                  "score": 10.0
+                }
+              },
+              "static_analysis": {
+                "avg_function_complexity": 0.0,
+                "avg_function_nloc": 0.0,
+                "avg_nesting_depth": 0.0,
+                "boolean_operator_count": 0,
+                "class_count": 0,
+                "complex_conditional_count": 0,
+                "conditional_count": 0,
+                "function_count": 0,
+                "high_complexity_function_count": 0,
+                "large_function_count": 0,
+                "max_function_complexity": 0,
+                "max_function_nloc": 0,
+                "max_function_parameter_count": 0,
+                "max_nesting_depth": 0,
+                "top_level_function_count": 0
+              }
+            },
+            "name": "repo_codehealth_analysis_2_feature_unslopped.json",
+            "path": "demo_artifacts/repo_codehealth_analysis_2_feature_unslopped.json",
+            "path_format": "posix",
+            "path_kind": "repository_relative",
+            "symbols": {
+              "functions": []
+            }
+          },
+          {
+            "children": [],
+            "dependencies": [],
+            "kind": "file",
+            "language": null,
+            "metrics": {
+              "dependency_analysis": {
+                "import_coupling_count": 0,
+                "incoming_dependency_count": 0,
+                "outgoing_dependency_count": 0
+              },
+              "hotspot_activity_weight": 1,
+              "hotspot_activity_weight_normalized": 0.058823529411764705,
+              "hotspot_score": 0.0,
+              "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
+              "hotspot_size_score": 0.0,
+              "revision_count": 1,
+              "revision_count_normalized": 0.058823529411764705,
+              "scores": {
+                "health": {
+                  "factors": {
+                    "file_size_health": 10.0,
+                    "function_health_available": false,
+                    "import_coupling_count": 0,
+                    "import_coupling_penalty": 0.0,
+                    "incoming_dependency_count": 0,
+                    "outgoing_dependency_count": 0
+                  },
+                  "formula": "file_size_health - import_coupling_penalty",
+                  "reasons": [
+                    "no functions detected by Lizard"
+                  ],
+                  "scale": "0_to_10",
+                  "score": 10.0
+                }
+              },
+              "static_analysis": {
+                "avg_function_complexity": 0.0,
+                "avg_function_nloc": 0.0,
+                "avg_nesting_depth": 0.0,
+                "boolean_operator_count": 0,
+                "class_count": 0,
+                "complex_conditional_count": 0,
+                "conditional_count": 0,
+                "function_count": 0,
+                "high_complexity_function_count": 0,
+                "large_function_count": 0,
+                "max_function_complexity": 0,
+                "max_function_nloc": 0,
+                "max_function_parameter_count": 0,
+                "max_nesting_depth": 0,
+                "top_level_function_count": 0
+              }
+            },
+            "name": "slop-to-unslop-demo.mp4",
+            "path": "demo_artifacts/slop-to-unslop-demo.mp4",
+            "path_format": "posix",
+            "path_kind": "repository_relative",
+            "symbols": {
+              "functions": []
+            }
+          }
+        ],
+        "dependencies": [],
+        "kind": "directory",
+        "language": null,
+        "metrics": {
+          "scores": {
+            "health": {
+              "formula": "code_line_weighted_average(file_health_score)",
+              "low_health_file_count": 0,
+              "median_child_health_score": 10.0,
+              "scale": "0_to_10",
+              "score": 10.0,
+              "top_low_health_files": [],
+              "total_code_line_count": 0,
+              "weighted_average_file_health_score": 10.0,
+              "worst_child_health_score": 10.0
+            }
+          }
+        },
+        "name": "demo_artifacts",
+        "path": "demo_artifacts",
+        "path_format": "posix",
+        "path_kind": "repository_relative",
+        "symbols": {}
+      },
+      {
+        "children": [
+          {
+            "children": [],
+            "dependencies": [],
+            "kind": "file",
+            "language": null,
+            "metrics": {
+              "dependency_analysis": {
+                "import_coupling_count": 0,
+                "incoming_dependency_count": 0,
+                "outgoing_dependency_count": 0
+              },
               "hotspot_activity_weight": 2,
-              "hotspot_activity_weight_normalized": 0.13333333333333333,
+              "hotspot_activity_weight_normalized": 0.11764705882352941,
               "hotspot_score": 0.0,
               "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
               "hotspot_size_score": 0.0,
               "revision_count": 2,
-              "revision_count_normalized": 0.13333333333333333,
+              "revision_count_normalized": 0.11764705882352941,
               "scores": {
                 "health": {
                   "factors": {
@@ -1152,12 +1476,12 @@
                   },
                   "file_language": "Python",
                   "hotspot_activity_weight": 1,
-                  "hotspot_activity_weight_normalized": 0.06666666666666667,
-                  "hotspot_score": 0.0013605442176870747,
+                  "hotspot_activity_weight_normalized": 0.058823529411764705,
+                  "hotspot_score": 0.0011883541295306002,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
-                  "hotspot_size_score": 0.02040816326530612,
+                  "hotspot_size_score": 0.020202020202020204,
                   "revision_count": 1,
-                  "revision_count_normalized": 0.06666666666666667,
+                  "revision_count_normalized": 0.058823529411764705,
                   "scores": {
                     "health": {
                       "factors": {
@@ -1208,8 +1532,8 @@
                 "kind": "file",
                 "language": "Python",
                 "metrics": {
-                  "blank_line_count": 29,
-                  "code_line_count": 98,
+                  "blank_line_count": 27,
+                  "code_line_count": 99,
                   "comment_line_count": 0,
                   "dependency_analysis": {
                     "import_coupling_count": 2,
@@ -1217,51 +1541,51 @@
                     "outgoing_dependency_count": 0
                   },
                   "file_language": "Python",
-                  "hotspot_activity_weight": 3,
-                  "hotspot_activity_weight_normalized": 0.2,
-                  "hotspot_score": 0.2,
+                  "hotspot_activity_weight": 4,
+                  "hotspot_activity_weight_normalized": 0.23529411764705882,
+                  "hotspot_score": 0.23529411764705882,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 1.0,
-                  "revision_count": 3,
-                  "revision_count_normalized": 0.2,
+                  "revision_count": 4,
+                  "revision_count_normalized": 0.23529411764705882,
                   "scores": {
                     "health": {
                       "factors": {
-                        "base_health_score": 9.29,
+                        "base_health_score": 8.0,
                         "function_health_available": true,
                         "import_coupling_count": 2,
                         "import_coupling_penalty": 0.0,
                         "incoming_dependency_count": 2,
                         "outgoing_dependency_count": 0,
-                        "weighted_average_function_health": 9.29,
-                        "worst_function_cap": 9.5,
+                        "weighted_average_function_health": 8.74,
+                        "worst_function_cap": 8.0,
                         "worst_function_cap_bonus": 2.0,
-                        "worst_function_health": 7.5
+                        "worst_function_health": 6.0
                       },
                       "formula": "min(weighted_average_function_health, worst_function_health + worst_function_cap_bonus) - import_coupling_penalty",
                       "reasons": [
-                        "functions are small and low complexity"
+                        "capped by low-health function"
                       ],
                       "scale": "0_to_10",
-                      "score": 9.29
+                      "score": 8.0
                     }
                   },
                   "static_analysis": {
-                    "avg_function_complexity": 3.5454545454545454,
-                    "avg_function_nloc": 7.7272727272727275,
-                    "avg_nesting_depth": 1.1818181818181819,
+                    "avg_function_complexity": 4.1,
+                    "avg_function_nloc": 8.6,
+                    "avg_nesting_depth": 1.2,
                     "boolean_operator_count": 6,
                     "class_count": 0,
                     "complex_conditional_count": 4,
-                    "conditional_count": 16,
-                    "function_count": 11,
-                    "high_complexity_function_count": 0,
+                    "conditional_count": 19,
+                    "function_count": 10,
+                    "high_complexity_function_count": 1,
                     "large_function_count": 0,
-                    "max_function_complexity": 9,
-                    "max_function_nloc": 24,
+                    "max_function_complexity": 11,
+                    "max_function_nloc": 27,
                     "max_function_parameter_count": 2,
                     "max_nesting_depth": 3,
-                    "top_level_function_count": 11
+                    "top_level_function_count": 10
                   }
                 },
                 "name": "processor.py",
@@ -1274,7 +1598,7 @@
                       "cyclomatic_complexity": 3,
                       "end_line": 18,
                       "length": 7,
-                      "name": "_text_field( mapping : JsonMap , key : str )",
+                      "name": "_number_field( mapping : JsonMap , key : str )",
                       "nloc": 7,
                       "parameter_count": 2,
                       "scores": {
@@ -1303,40 +1627,8 @@
                       }
                     },
                     {
-                      "cyclomatic_complexity": 3,
-                      "end_line": 27,
-                      "length": 7,
-                      "name": "_number_field( mapping : JsonMap , key : str )",
-                      "nloc": 7,
-                      "parameter_count": 2,
-                      "scores": {
-                        "health": {
-                          "factors": {
-                            "complexity_penalty": 0.0,
-                            "conditional_penalty": 0.0,
-                            "nesting_penalty": 0.0,
-                            "parameter_penalty": 0.0,
-                            "size_penalty": 0.0
-                          },
-                          "formula": "10 - size_penalty - complexity_penalty - parameter_penalty - nesting_penalty - conditional_penalty",
-                          "reasons": [
-                            "small low-complexity function"
-                          ],
-                          "scale": "0_to_10",
-                          "score": 10.0
-                        }
-                      },
-                      "start_line": 21,
-                      "structural_metrics": {
-                        "boolean_operator_count": 0,
-                        "complex_conditional_count": 0,
-                        "conditional_count": 2,
-                        "max_nesting_depth": 1
-                      }
-                    },
-                    {
                       "cyclomatic_complexity": 5,
-                      "end_line": 38,
+                      "end_line": 29,
                       "length": 9,
                       "name": "_list_path( mapping : JsonMap , keys : tuple [ str , ... ] )",
                       "nloc": 9,
@@ -1358,7 +1650,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 30,
+                      "start_line": 21,
                       "structural_metrics": {
                         "boolean_operator_count": 1,
                         "complex_conditional_count": 1,
@@ -1367,11 +1659,11 @@
                       }
                     },
                     {
-                      "cyclomatic_complexity": 4,
-                      "end_line": 48,
-                      "length": 8,
+                      "cyclomatic_complexity": 5,
+                      "end_line": 42,
+                      "length": 11,
                       "name": "_payload_metadata( order : JsonMap )",
-                      "nloc": 8,
+                      "nloc": 11,
                       "parameter_count": 1,
                       "scores": {
                         "health": {
@@ -1390,17 +1682,17 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 41,
+                      "start_line": 32,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
-                        "conditional_count": 1,
+                        "conditional_count": 2,
                         "max_nesting_depth": 1
                       }
                     },
                     {
                       "cyclomatic_complexity": 3,
-                      "end_line": 57,
+                      "end_line": 51,
                       "length": 7,
                       "name": "parse_int_or_default( raw : JsonValue , default : int = 0 )",
                       "nloc": 7,
@@ -1422,7 +1714,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 51,
+                      "start_line": 45,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
@@ -1431,11 +1723,11 @@
                       }
                     },
                     {
-                      "cyclomatic_complexity": 4,
-                      "end_line": 66,
-                      "length": 7,
+                      "cyclomatic_complexity": 5,
+                      "end_line": 61,
+                      "length": 8,
                       "name": "_book_score( item : JsonMap )",
-                      "nloc": 7,
+                      "nloc": 8,
                       "parameter_count": 1,
                       "scores": {
                         "health": {
@@ -1454,17 +1746,17 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 60,
+                      "start_line": 54,
                       "structural_metrics": {
                         "boolean_operator_count": 2,
                         "complex_conditional_count": 1,
-                        "conditional_count": 1,
+                        "conditional_count": 2,
                         "max_nesting_depth": 1
                       }
                     },
                     {
                       "cyclomatic_complexity": 3,
-                      "end_line": 72,
+                      "end_line": 67,
                       "length": 4,
                       "name": "_subscription_score( item : JsonMap )",
                       "nloc": 4,
@@ -1486,7 +1778,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 69,
+                      "start_line": 64,
                       "structural_metrics": {
                         "boolean_operator_count": 1,
                         "complex_conditional_count": 1,
@@ -1496,7 +1788,7 @@
                     },
                     {
                       "cyclomatic_complexity": 2,
-                      "end_line": 79,
+                      "end_line": 74,
                       "length": 5,
                       "name": "_credit_score( item : JsonMap )",
                       "nloc": 5,
@@ -1518,7 +1810,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 75,
+                      "start_line": 70,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
@@ -1528,7 +1820,7 @@
                     },
                     {
                       "cyclomatic_complexity": 1,
-                      "end_line": 83,
+                      "end_line": 78,
                       "length": 2,
                       "name": "_gift_score( item : JsonMap )",
                       "nloc": 2,
@@ -1550,7 +1842,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 82,
+                      "start_line": 77,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
@@ -1559,11 +1851,11 @@
                       }
                     },
                     {
-                      "cyclomatic_complexity": 2,
-                      "end_line": 98,
-                      "length": 5,
+                      "cyclomatic_complexity": 3,
+                      "end_line": 94,
+                      "length": 6,
                       "name": "_score_item( item : JsonMap )",
-                      "nloc": 5,
+                      "nloc": 6,
                       "parameter_count": 1,
                       "scores": {
                         "health": {
@@ -1582,25 +1874,25 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 94,
+                      "start_line": 89,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
-                        "conditional_count": 1,
+                        "conditional_count": 2,
                         "max_nesting_depth": 1
                       }
                     },
                     {
-                      "cyclomatic_complexity": 9,
-                      "end_line": 127,
-                      "length": 27,
+                      "cyclomatic_complexity": 11,
+                      "end_line": 126,
+                      "length": 30,
                       "name": "process_order( order : JsonMap )",
-                      "nloc": 24,
+                      "nloc": 27,
                       "parameter_count": 1,
                       "scores": {
                         "health": {
                           "factors": {
-                            "complexity_penalty": 1.5,
+                            "complexity_penalty": 3.0,
                             "conditional_penalty": 0.0,
                             "nesting_penalty": 1.0,
                             "parameter_penalty": 0.0,
@@ -1608,18 +1900,18 @@
                           },
                           "formula": "10 - size_penalty - complexity_penalty - parameter_penalty - nesting_penalty - conditional_penalty",
                           "reasons": [
-                            "moderate cyclomatic complexity",
+                            "high cyclomatic complexity",
                             "nested complexity"
                           ],
                           "scale": "0_to_10",
-                          "score": 7.5
+                          "score": 6.0
                         }
                       },
-                      "start_line": 101,
+                      "start_line": 97,
                       "structural_metrics": {
                         "boolean_operator_count": 2,
                         "complex_conditional_count": 1,
-                        "conditional_count": 4,
+                        "conditional_count": 6,
                         "max_nesting_depth": 3
                       }
                     }
@@ -1638,12 +1930,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 2,
-                  "hotspot_activity_weight_normalized": 0.13333333333333333,
+                  "hotspot_activity_weight_normalized": 0.11764705882352941,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 2,
-                  "revision_count_normalized": 0.13333333333333333,
+                  "revision_count_normalized": 0.11764705882352941,
                   "scores": {
                     "health": {
                       "factors": {
@@ -1699,11 +1991,11 @@
                   "low_health_file_count": 0,
                   "median_child_health_score": 10.0,
                   "scale": "0_to_10",
-                  "score": 9.31,
+                  "score": 8.06,
                   "top_low_health_files": [],
-                  "total_code_line_count": 100,
-                  "weighted_average_file_health_score": 9.31,
-                  "worst_child_health_score": 9.29
+                  "total_code_line_count": 101,
+                  "weighted_average_file_health_score": 8.06,
+                  "worst_child_health_score": 8.0
                 }
               }
             },
@@ -1724,11 +2016,11 @@
               "low_health_file_count": 0,
               "median_child_health_score": 10.0,
               "scale": "0_to_10",
-              "score": 9.31,
+              "score": 8.06,
               "top_low_health_files": [],
-              "total_code_line_count": 100,
-              "weighted_average_file_health_score": 9.31,
-              "worst_child_health_score": 9.29
+              "total_code_line_count": 101,
+              "weighted_average_file_health_score": 8.06,
+              "worst_child_health_score": 8.0
             }
           }
         },
@@ -1758,12 +2050,12 @@
               },
               "file_language": "Python",
               "hotspot_activity_weight": 2,
-              "hotspot_activity_weight_normalized": 0.13333333333333333,
-              "hotspot_score": 0.04081632653061225,
+              "hotspot_activity_weight_normalized": 0.11764705882352941,
+              "hotspot_score": 0.035650623885918005,
               "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
-              "hotspot_size_score": 0.30612244897959184,
+              "hotspot_size_score": 0.30303030303030304,
               "revision_count": 2,
-              "revision_count_normalized": 0.13333333333333333,
+              "revision_count_normalized": 0.11764705882352941,
               "scores": {
                 "health": {
                   "factors": {
@@ -1914,12 +2206,12 @@
             "outgoing_dependency_count": 0
           },
           "hotspot_activity_weight": 1,
-          "hotspot_activity_weight_normalized": 0.06666666666666667,
+          "hotspot_activity_weight_normalized": 0.058823529411764705,
           "hotspot_score": 0.0,
           "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
           "hotspot_size_score": 0.0,
           "revision_count": 1,
-          "revision_count_normalized": 0.06666666666666667,
+          "revision_count_normalized": 0.058823529411764705,
           "scores": {
             "health": {
               "factors": {
@@ -1976,12 +2268,12 @@
             "outgoing_dependency_count": 0
           },
           "hotspot_activity_weight": 1,
-          "hotspot_activity_weight_normalized": 0.06666666666666667,
+          "hotspot_activity_weight_normalized": 0.058823529411764705,
           "hotspot_score": 0.0,
           "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
           "hotspot_size_score": 0.0,
           "revision_count": 1,
-          "revision_count_normalized": 0.06666666666666667,
+          "revision_count_normalized": 0.058823529411764705,
           "scores": {
             "health": {
               "factors": {
@@ -2037,13 +2329,13 @@
             "incoming_dependency_count": 0,
             "outgoing_dependency_count": 0
           },
-          "hotspot_activity_weight": 3,
-          "hotspot_activity_weight_normalized": 0.2,
+          "hotspot_activity_weight": 4,
+          "hotspot_activity_weight_normalized": 0.23529411764705882,
           "hotspot_score": 0.0,
           "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
           "hotspot_size_score": 0.0,
-          "revision_count": 3,
-          "revision_count_normalized": 0.2,
+          "revision_count": 4,
+          "revision_count_normalized": 0.23529411764705882,
           "scores": {
             "health": {
               "factors": {
@@ -2100,12 +2392,12 @@
             "outgoing_dependency_count": 0
           },
           "hotspot_activity_weight": 1,
-          "hotspot_activity_weight_normalized": 0.06666666666666667,
+          "hotspot_activity_weight_normalized": 0.058823529411764705,
           "hotspot_score": 0.0,
           "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
           "hotspot_size_score": 0.0,
           "revision_count": 1,
-          "revision_count_normalized": 0.06666666666666667,
+          "revision_count_normalized": 0.058823529411764705,
           "scores": {
             "health": {
               "factors": {
@@ -2161,11 +2453,11 @@
           "low_health_file_count": 0,
           "median_child_health_score": 10.0,
           "scale": "0_to_10",
-          "score": 9.52,
+          "score": 8.68,
           "top_low_health_files": [],
-          "total_code_line_count": 130,
-          "weighted_average_file_health_score": 9.52,
-          "worst_child_health_score": 9.29
+          "total_code_line_count": 131,
+          "weighted_average_file_health_score": 8.68,
+          "worst_child_health_score": 8.0
         }
       }
     },
@@ -2185,6 +2477,7 @@
       "blank_line_count": "Blank lines for this file from cloc.",
       "boolean_operator_count": "Number of boolean operators inside branch conditions. Maps to CodeScene's Complex Conditional signal.",
       "class_count": "Number of Python classes in a file. Early module responsibility pressure signal related to Brain Class/God Class analysis.",
+      "classic_smells": "Classic code, architectural, and structural smell findings. Preserved as raw evidence under the top-level classic_smells key and not currently used in health scoring.",
       "code_duplication_ratio": "Duplicated code lines as a percentage of total code lines.",
       "code_duplication_total": "Number of duplicated code lines across all files. A line is duplicated when it belongs to a block of 10 or more consecutive non-empty, non-comment lines that appear identically in at least one other file. Uses union of overlapping ranges per file.",
       "code_line_count": "Physical code lines for this file from cloc.",
@@ -2230,7 +2523,6 @@
       "methods_total": "Total number of functions across all source files in the project.",
       "nesting_penalty": "Function health penalty from AST max_nesting_depth.",
       "outgoing_dependency_count": "Number of unique local Python files imported by this file.",
-      "classic_smells": "Classic code, architectural, and structural smell findings. Preserved as raw evidence under the top-level classic_smells key and not currently used in health scoring.",
       "revision_count": "Number of Git revisions that touched this repository-relative path during the configured analysis window. Produced by Code Maat revisions analysis.",
       "revision_count_normalized": "revision_count divided by the maximum revision_count observed in this analysis output. Range: 0.0 to 1.0.",
       "risk_score": "Reserved for a future score combining temporal activity with low health.",
@@ -2259,11 +2551,11 @@
   "summary": {
     "code_duplication_ratio": 0.0,
     "code_duplication_total": 0,
-    "file_count": 18,
+    "file_count": 22,
     "file_duplication_ratio": 0.0,
     "file_duplication_total": 0,
-    "folders_total": 8,
-    "huge_cyclomatic_complexity_ratio": 0.0,
+    "folders_total": 9,
+    "huge_cyclomatic_complexity_ratio": 8.333333333333332,
     "huge_depth_ratio": 0.0,
     "huge_depth_total": 0,
     "huge_folder_ratio": 0.0,
@@ -2271,31 +2563,31 @@
     "huge_method_ratio": 0.0,
     "huge_non_headerfile_ratio": 0.0,
     "huge_non_headerfile_total": 0,
-    "lines_per_file": 7.222222222222222,
-    "max_code_line_count": 98,
-    "max_revision_count": 15,
-    "methods_total": 13,
+    "lines_per_file": 5.954545454545454,
+    "max_code_line_count": 99,
+    "max_revision_count": 17,
+    "methods_total": 12,
     "python_file_count": 3,
     "scores": {
       "health": {
-        "file_count": 18,
+        "file_count": 22,
         "formula": "code_line_weighted_average(file_health_score)",
         "low_health_file_count": 0,
         "median_child_health_score": 10.0,
         "scale": "0_to_10",
-        "score": 9.52,
+        "score": 8.68,
         "top_low_health_files": [],
-        "total_code_line_count": 130,
-        "weighted_average_file_health_score": 9.52,
-        "worst_child_health_score": 9.29,
+        "total_code_line_count": 131,
+        "weighted_average_file_health_score": 8.68,
+        "worst_child_health_score": 8.0,
         "worst_files": []
       }
     },
-    "structural_erosion": 0.0,
-    "total_code_line_count": 130,
-    "total_cyclomatic_complexity": 41,
-    "total_method_lines": 114,
-    "total_raw_lines": 169,
+    "structural_erosion": 0.39269719329999897,
+    "total_code_line_count": 131,
+    "total_cyclomatic_complexity": 43,
+    "total_method_lines": 115,
+    "total_raw_lines": 168,
     "warning_suppression_kloc": 0.0,
     "warning_suppression_total": 0
   }
