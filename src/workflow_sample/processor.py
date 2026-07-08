@@ -95,7 +95,7 @@ def process_order(order: JsonMap) -> JsonMap:
         payload = json.loads(_text_field(order, "payload") or "{}")
         if not isinstance(payload, dict):
             payload = {}
-    except ValueError:
+    except (Exception):
         pass
 
     items = _list_path(order, ("data", "attributes", "items"))
