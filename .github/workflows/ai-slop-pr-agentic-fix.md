@@ -507,6 +507,145 @@ steps:
         echo "The cleanup PR will target \`${ORIGINAL_PR_HEAD_REF}\`, the source branch of PR #${ORIGINAL_PR_NUMBER}."
       } >> "$GITHUB_STEP_SUMMARY"
 
+  - name: Build remediation comment statuses
+    if: always()
+    run: |
+      set -euo pipefail
+
+      mkdir -p /tmp/gh-aw/agent
+
+      python - <<'PY'
+      import json
+      from pathlib import Path
+      from typing import Any
+
+      introduced_path = Path("/tmp/gh-aw/agent/introduced-diagnostics.json")
+      request_path = Path("/tmp/gh-aw/agent/create-pr-request.json")
+      run_full_path = Path("/tmp/repo-analysis/agentic-fixes/run-full.json")
+      merge_report_path = Path("/tmp/repo-analysis/merged/merge-report.json")
+      output_path = Path("/tmp/gh-aw/agent/remediation-status.json")
+
+      def read_object(path: Path) -> dict[str, Any]:
+          if not path.exists():
+              return {}
+          try:
+              payload = json.loads(path.read_text(encoding="utf-8"))
+          except json.JSONDecodeError:
+              return {}
+          return payload if isinstance(payload, dict) else {}
+
+      def read_items(path: Path, key: str) -> list[dict[str, Any]]:
+          payload = read_object(path)
+          items = payload.get(key)
+          if not isinstance(items, list):
+              return []
+          return [item for item in items if isinstance(item, dict)]
+
+      def strings(values: Any) -> set[str]:
+          if not isinstance(values, list):
+              return set()
+          return {str(value) for value in values if isinstance(value, str) and value}
+
+      def diagnostic_ids_for_task(entry: dict[str, Any]) -> set[str]:
+          task = entry.get("task") if isinstance(entry.get("task"), dict) else {}
+          result = entry.get("result") if isinstance(entry.get("result"), dict) else {}
+          ids: set[str] = set()
+          primary = task.get("primaryDiagnosticId")
+          if isinstance(primary, str) and primary:
+              ids.add(primary)
+          primary = result.get("primaryDiagnosticId")
+          if isinstance(primary, str) and primary:
+              ids.add(primary)
+          ids.update(strings(task.get("sourceDiagnosticIds")))
+          ids.update(strings(result.get("sourceDiagnosticIds")))
+          evidence = task.get("evidence")
+          if isinstance(evidence, list):
+              for item in evidence:
+                  if isinstance(item, dict):
+                      diagnostic_id = item.get("diagnosticId")
+                      if isinstance(diagnostic_id, str) and diagnostic_id:
+                          ids.add(diagnostic_id)
+          return ids
+
+      request = read_object(request_path)
+      should_create_pr = request.get("shouldCreatePr") is True
+
+      included_task_statuses: dict[str, str] = {}
+      merge_report = read_object(merge_report_path)
+      groups = merge_report.get("groups")
+      for group in groups if isinstance(groups, list) else []:
+          if not isinstance(group, dict):
+              continue
+          patches = group.get("patches")
+          for patch in patches if isinstance(patches, list) else []:
+              if not isinstance(patch, dict):
+                  continue
+              task_id = patch.get("taskId")
+              status = patch.get("status")
+              if isinstance(task_id, str) and isinstance(status, str):
+                  included_task_statuses[task_id] = status
+
+      tasks_by_diagnostic: dict[str, dict[str, Any]] = {}
+      run_full = read_object(run_full_path)
+      task_entries = run_full.get("tasks")
+      for entry in task_entries if isinstance(task_entries, list) else []:
+          if not isinstance(entry, dict):
+              continue
+          task = entry.get("task") if isinstance(entry.get("task"), dict) else {}
+          result = entry.get("result") if isinstance(entry.get("result"), dict) else {}
+          task_id = str(entry.get("taskId") or task.get("id") or result.get("taskId") or "")
+          status = str(result.get("status") or "unknown")
+          for diagnostic_id in diagnostic_ids_for_task(entry):
+              tasks_by_diagnostic[diagnostic_id] = {
+                  "taskId": task_id,
+                  "remediationStatus": status,
+                  "patchStatus": included_task_statuses.get(task_id),
+              }
+
+      items = []
+      by_diagnostic_id: dict[str, dict[str, Any]] = {}
+      for diagnostic in read_items(introduced_path, "introduced_diagnostics"):
+          diagnostic_id = diagnostic.get("diagnosticId")
+          rule = diagnostic.get("rule")
+          task = tasks_by_diagnostic.get(str(diagnostic_id), {}) if isinstance(diagnostic_id, str) else {}
+          patch_status = task.get("patchStatus")
+          addressed = should_create_pr and patch_status in {"applied", "merged_by_agent"}
+
+          if addressed:
+              status = "addressed"
+              comment_status = "Addressed in the generated cleanup PR."
+          elif task:
+              status = "not_addressed"
+              comment_status = "Not addressed in the generated cleanup PR."
+          else:
+              status = "not_addressed"
+              comment_status = "Not selected for automatic remediation."
+
+          item = {
+              "diagnosticId": diagnostic_id,
+              "filePath": diagnostic.get("filePath"),
+              "line": diagnostic.get("line"),
+              "rule": rule,
+              "analysisSource": diagnostic.get("analysisSource"),
+              "status": status,
+              "commentStatus": comment_status,
+              "taskId": task.get("taskId"),
+              "remediationStatus": task.get("remediationStatus"),
+              "patchStatus": patch_status,
+          }
+          items.append(item)
+          if isinstance(diagnostic_id, str) and diagnostic_id:
+              by_diagnostic_id[diagnostic_id] = item
+
+      output = {
+          "schemaVersion": "code-quality.remediation-comment-status.v1",
+          "shouldCreatePr": should_create_pr,
+          "items": items,
+          "byDiagnosticId": by_diagnostic_id,
+      }
+      output_path.write_text(json.dumps(output, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+      PY
+
   - name: Upload code quality remediation artifacts
     if: always()
     uses: actions/upload-artifact@v7.0.1
@@ -516,6 +655,7 @@ steps:
         /tmp/repo-analysis/
         /tmp/gh-aw/agent/create-pr-request.json
         /tmp/gh-aw/agent/introduced-findings-issue.md
+        /tmp/gh-aw/agent/remediation-status.json
       retention-days: 14
       if-no-files-found: warn
 ---
@@ -527,8 +667,9 @@ filtered introduced findings, written the introduced diagnostics report, run
 agentic fix generation, merged eligible patches, and applied the combined diff
 to the workspace when a reviewable patch was available.
 
-First, read `/tmp/gh-aw/agent/introduced-diagnostics.json` and
-`/tmp/gh-aw/agent/introduced-findings-issue.md`.
+First, read `/tmp/gh-aw/agent/introduced-diagnostics.json`,
+`/tmp/gh-aw/agent/introduced-findings-issue.md`, and
+`/tmp/gh-aw/agent/remediation-status.json`.
 
 If the introduced diagnostics JSON file exists, is valid, and contains one or
 more introduced diagnostics or findings, create exactly one issue using the
@@ -550,7 +691,12 @@ output.
 Each review comment must use the item's `filePath` as `path`, the item's `line`
 as `line`, and a very brief body in this format:
 
-`<Source>: <Rule>. See the Code Quality summary issue for details.`
+`<Source>: <Rule>. <Remediation status> See the Code Quality summary issue for details.`
+
+Look up `<Remediation status>` by matching the item's `diagnosticId` against
+`byDiagnosticId` in `/tmp/gh-aw/agent/remediation-status.json` and using that
+entry's `commentStatus`. If there is no matching remediation status, use
+`Remediation status unavailable.`
 
 Use the source label from `analysisSource`, using `AI Slop` for
 `deterministic_static_analysis` and `llm_review`, `PyExamine` for `pyexamine`,
