@@ -94,7 +94,7 @@
       "until": null
     }
   },
-  "pyexamine": {
+  "classic_smells": {
     "enabled": true,
     "findings": [
       {
@@ -110,7 +110,6 @@
         "type": "code"
       }
     ],
-    "package": "code-quality-analyzer",
     "schemaVersion": "1",
     "summary": {
       "architectural": 0,
@@ -124,7 +123,7 @@
       "structural": 0,
       "total": 1
     },
-    "tool": "PyExamine",
+    "tool": "Classic Smells",
     "types": [
       "code",
       "architectural",
@@ -1716,7 +1715,7 @@
       "methods_total": "Total number of functions across all source files in the project.",
       "nesting_penalty": "Function health penalty from AST max_nesting_depth.",
       "outgoing_dependency_count": "Number of unique local Python files imported by this file.",
-      "pyexamine": "PyExamine code, architectural, and structural smell findings. Preserved as raw evidence under the top-level pyexamine key and not currently used in health scoring.",
+      "classic_smells": "Classic code, architectural, and structural smell findings. Preserved as raw evidence under the top-level classic_smells key and not currently used in health scoring.",
       "revision_count": "Number of Git revisions that touched this repository-relative path during the configured analysis window. Produced by Code Maat revisions analysis.",
       "revision_count_normalized": "revision_count divided by the maximum revision_count observed in this analysis output. Range: 0.0 to 1.0.",
       "risk_score": "Reserved for a future score combining temporal activity with low health.",

@@ -1,6 +1,6 @@
 ---
 name: Code Quality PR Agentic Fix
-description: Scan PR base/head, report introduced findings, fix introduced AI Slop and PyExamine findings, merge patches, and open a cleanup PR into the original PR head branch when a non-empty generated fix applies cleanly.
+description: Scan PR base/head, report introduced findings, fix introduced AI Slop and classic smell findings, merge patches, and open a cleanup PR into the original PR head branch when a non-empty generated fix applies cleanly.
 
 on:
   pull_request:
@@ -159,7 +159,7 @@ jobs:
               if source in {"deterministic_static_analysis", "llm_review"}:
                   return "AI Slop"
               if source == "pyexamine":
-                  return "PyExamine"
+                  return "Classic Smells"
               return "Finding"
 
           introduced = read_object(introduced_path)
@@ -455,7 +455,7 @@ steps:
         --introduced /tmp/repo-analysis/introduced-diagnostics.json \
         --output /tmp/repo-analysis/introduced-fix-analysis.json
 
-      fixable_count="$(jq '((.aislop.diagnostics // []) | length) + ((.pyexamine.findings // []) | length)' /tmp/repo-analysis/introduced-fix-analysis.json)"
+      fixable_count="$(jq '((.aislop.diagnostics // []) | length) + ((.classic_smells.findings // []) | length)' /tmp/repo-analysis/introduced-fix-analysis.json)"
       introduced_count="$(jq '.introducedDiagnostics // 0' /tmp/repo-analysis/introduced-fix-analysis.json)"
       ignored_count="$(jq '.ignoredDiagnostics // 0' /tmp/repo-analysis/introduced-fix-analysis.json)"
 

@@ -19,8 +19,8 @@ On pull requests that change Python project files, the workflow:
 3. Runs the repo analyzer on base and head with AI Slop LLM review enabled.
 4. Compares the reports and keeps only findings introduced by the PR.
 5. Opens one issue report and brief inline PR review comments for introduced
-   AI Slop and PyExamine findings.
-6. Builds remediation evidence for introduced AI Slop and PyExamine findings.
+   AI Slop and classic smell findings.
+6. Builds remediation evidence for introduced AI Slop and classic smell findings.
 7. Runs the analyzer's agentic fixer with Codex to generate reviewable patches.
 8. Merges eligible patches and opens a cleanup PR back into the original PR
    branch when a non-empty fix applies cleanly.
@@ -68,7 +68,7 @@ python ../repo-analysis-prototype/analyze.py \
 
 1. Push this repository to GitHub.
 2. Keep `main` clean of analyzer findings.
-3. Open a pull request from a branch that introduces AI Slop or PyExamine
+3. Open a pull request from a branch that introduces AI Slop or classic smell
    findings.
 4. Inspect the workflow step summary, uploaded artifacts, and generated cleanup
    PR.
