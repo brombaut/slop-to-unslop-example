@@ -721,6 +721,16 @@ only these fields from the JSON file:
 - `body`
 - `branch`
 
+The `branch` value in `/tmp/gh-aw/agent/create-pr-request.json` is
+authoritative. Before calling `create_pull_request`, check out exactly that
+branch with:
+
+`git checkout <branch from create-pr-request.json>`
+
+Use the same JSON `branch` value as the `create_pull_request` branch. Do not
+use `git branch --show-current`, the current checkout, or any inferred branch
+name to choose or replace the cleanup PR branch.
+
 Do not edit repository files, create additional branches with git commands,
 open additional pull requests, create comments other than the inline review
 comments described above, or change the prepared title/body/branch. Apart from
