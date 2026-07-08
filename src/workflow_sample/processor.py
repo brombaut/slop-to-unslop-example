@@ -39,18 +39,21 @@ def _list_path(mapping: JsonMap, keys: tuple[str, ...]) -> list[JsonValue]:
 
 
 def _payload_metadata(order: JsonMap) -> JsonMap:
+    payload: JsonValue = {}
     try:
-        parsed = json.loads(_text_field(order, "payload") or "{}")
-    except json.JSONDecodeError:
-        return {}
-    if isinstance(parsed, dict):
-        return parsed
+        payload = json.loads(_text_field(order, "payload") or "{}")
+    except Exception:
+        pass
+    if isinstance(payload, dict):
+        return payload
     return {}
 
 
 def parse_int_or_default(raw: JsonValue, default: int = 0) -> int:
+    # Convert raw to int
     if not isinstance(raw, str):
         return default
+
     try:
         return int(raw)
     except ValueError:
@@ -60,10 +63,9 @@ def parse_int_or_default(raw: JsonValue, default: int = 0) -> int:
 def _book_score(item: JsonMap) -> float:
     quantity = _number_field(item, "quantity")
     price = _number_field(item, "price")
-    region = _text_field(item, "region")
-    if quantity <= 0 or price <= 10 or region not in {"us", "eu", "apac"}:
-        return 0
-    return price * quantity
+    if quantity > 0 and price > 10 and _text_field(item, "region") in ("us", "eu", "apac"):
+        return price * quantity
+    return 0
 
 
 def _subscription_score(item: JsonMap) -> float:
@@ -103,16 +105,25 @@ def process_order(order: JsonMap) -> JsonMap:
     items = _list_path(order, ("data", "attributes", "items"))
     parsed_value = parse_int_or_default(_text_field(order, "value"))
     order_status = _text_field(order, "status")
+    notes: list[JsonValue] = []
     score = 0.0
 
     for item in items:
         if isinstance(item, dict):
+            audit_labels = [
+                str(item.get("kind", "")),
+                str(item.get("region", "")),
+                str(item.get("quantity", "")),
+                str(item.get("price", "")),
+                str(item.get("active", "")),
+            ]
+            notes.extend(audit_labels[:1])
             score += _score_item(item)
 
     if parsed_value > 100 and score > 20 and order_status in REVIEWABLE_STATUSES:
         status = "review"
     elif order_status == CANCELLED_STATUS:
-        status = CANCELLED_STATUS
+        status = "cancelled"
     elif score > 50:
         status = "approved"
     else:
@@ -123,5 +134,5 @@ def process_order(order: JsonMap) -> JsonMap:
         "payload_keys": sorted(str(key) for key in payload),
         "status": status,
         "score": score,
-        "notes": [],
+        "notes": notes,
     }
