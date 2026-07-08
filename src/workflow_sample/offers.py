@@ -9,7 +9,14 @@ class OfferLabelBuffer:
     def __init__(self) -> None:
         self.items: list[str] = []
 
-    def push(self, label: str) -> None:
+    def __len__(self) -> int:
+        return len(self.items)
+
+    @property
+    def length(self) -> int:
+        return len(self.items)
+
+    def append(self, label: str) -> None:
         self.items.append(label)
 
     def values(self) -> list[str]:
@@ -77,6 +84,10 @@ def summarize_offer_labels(labels: list[str]) -> tuple[str, ...]:
     return tuple(normalized)
 
 
+def has_offer_labels(buffer: OfferLabelBuffer) -> bool:
+    return buffer.length > 0
+
+
 def append_offer_label(buffer: OfferLabelBuffer, label: str) -> list[str]:
-    buffer.push(label)
+    buffer.append(label)
     return buffer.values()

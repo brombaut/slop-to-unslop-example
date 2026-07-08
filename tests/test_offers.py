@@ -2,6 +2,7 @@ from workflow_sample.offers import (
     OfferLabelBuffer,
     append_offer_label,
     can_receive_intro_offer,
+    has_offer_labels,
     normalize_env_value,
     parse_env_token,
     qualifies_for_trial_discount,
@@ -43,5 +44,7 @@ def test_env_helpers_parse_known_values():
 def test_offer_label_helpers_return_labels():
     buffer = OfferLabelBuffer()
 
+    assert has_offer_labels(buffer) is False
     assert append_offer_label(buffer, "trial") == ["trial"]
+    assert has_offer_labels(buffer) is True
     assert summarize_offer_labels(["trial", "vip"]) == ("trial", "vip")
