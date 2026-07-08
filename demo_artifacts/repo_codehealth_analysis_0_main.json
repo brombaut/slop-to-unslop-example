@@ -367,9 +367,7 @@
         "line": 43,
         "moduleClass": "_text_field",
         "name": "Potential Shotgun Surgery",
-        "normalizedSeverity": "error",
         "rule": "pyexamine/potential-shotgun-surgery",
-        "severity": "high",
         "type": "code"
       }
     ],
@@ -378,9 +376,6 @@
       "architectural": 0,
       "byName": {
         "Potential Shotgun Surgery": 1
-      },
-      "bySeverity": {
-        "high": 1
       },
       "code": 1,
       "structural": 0,

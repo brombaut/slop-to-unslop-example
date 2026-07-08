@@ -18,8 +18,7 @@
         "help": "Consider calling the inner function directly instead of wrapping it",
         "line": 60,
         "message": "Function 'qualifies_for_trial_discount' is a thin wrapper that only calls another function",
-        "rule": "ai-slop/thin-wrapper",
-        "severity": "warning"
+        "rule": "ai-slop/thin-wrapper"
       },
       {
         "analysisSource": "deterministic_static_analysis",
@@ -31,8 +30,7 @@
         "help": "Consider calling the inner function directly instead of wrapping it",
         "line": 64,
         "message": "Function 'can_receive_intro_offer' is a thin wrapper that only calls another function",
-        "rule": "ai-slop/thin-wrapper",
-        "severity": "warning"
+        "rule": "ai-slop/thin-wrapper"
       }
     ],
     "engineDefinitions": {
@@ -104,9 +102,7 @@
         "line": 44,
         "moduleClass": "_text_field",
         "name": "Potential Shotgun Surgery",
-        "normalizedSeverity": "error",
         "rule": "pyexamine/potential-shotgun-surgery",
-        "severity": "high",
         "type": "code"
       }
     ],
@@ -115,9 +111,6 @@
       "architectural": 0,
       "byName": {
         "Potential Shotgun Surgery": 1
-      },
-      "bySeverity": {
-        "high": 1
       },
       "code": 1,
       "structural": 0,

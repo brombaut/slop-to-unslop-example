@@ -37,8 +37,7 @@
             "symbol": "can_receive_intro_offer"
           }
         ],
-        "rule": "ai-slop/python-semantic-duplicate-business-logic",
-        "severity": "warning"
+        "rule": "ai-slop/python-semantic-duplicate-business-logic"
       },
       {
         "analysisSource": "deterministic_static_analysis",
@@ -50,8 +49,7 @@
         "help": "Remove comments that don't add information beyond what the code already expresses",
         "line": 82,
         "message": "Trivial comment that restates the code",
-        "rule": "ai-slop/trivial-comment",
-        "severity": "warning"
+        "rule": "ai-slop/trivial-comment"
       },
       {
         "analysisSource": "deterministic_static_analysis",
@@ -63,8 +61,7 @@
         "help": "Replace cross-language API leakage with the Python equivalent or the intended library call.",
         "line": 88,
         "message": "Python code appears to call or access a non-Python API: JavaScript/Java `.length`.",
-        "rule": "ai-slop/python-cross-language-api",
-        "severity": "warning"
+        "rule": "ai-slop/python-cross-language-api"
       },
       {
         "analysisSource": "deterministic_static_analysis",
@@ -76,8 +73,7 @@
         "help": "Narrow the exception class, log with context, or re-raise.",
         "line": 45,
         "message": "Broad exception handler silently drops failures.",
-        "rule": "ai-slop/python-broad-except",
-        "severity": "warning"
+        "rule": "ai-slop/python-broad-except"
       },
       {
         "analysisSource": "deterministic_static_analysis",
@@ -89,8 +85,7 @@
         "help": "Handle errors explicitly: log with context, rethrow, or return an error value",
         "line": 45,
         "message": "Bare except with pass swallows errors silently",
-        "rule": "ai-slop/swallowed-exception",
-        "severity": "error"
+        "rule": "ai-slop/swallowed-exception"
       },
       {
         "analysisSource": "llm_review",
@@ -137,8 +132,7 @@
             "symbol": "normalize_env_value"
           }
         ],
-        "rule": "ai-slop/python-llm-assertion-correctness",
-        "severity": "warning"
+        "rule": "ai-slop/python-llm-assertion-correctness"
       }
     ],
     "engineDefinitions": {
@@ -532,9 +526,7 @@
         "line": 44,
         "moduleClass": "_text_field",
         "name": "Potential Shotgun Surgery",
-        "normalizedSeverity": "error",
         "rule": "pyexamine/potential-shotgun-surgery",
-        "severity": "high",
         "type": "code"
       },
       {
@@ -544,9 +536,7 @@
         "line": 103,
         "moduleClass": "process_order",
         "name": "Feature Envy",
-        "normalizedSeverity": "warning",
         "rule": "pyexamine/feature-envy",
-        "severity": "medium",
         "type": "code"
       }
     ],
@@ -556,10 +546,6 @@
       "byName": {
         "Feature Envy": 1,
         "Potential Shotgun Surgery": 1
-      },
-      "bySeverity": {
-        "high": 1,
-        "medium": 1
       },
       "code": 2,
       "structural": 0,
