@@ -44,7 +44,7 @@ tools:
 safe-outputs:
   threat-detection: false
   mentions: false
-  allowed-github-references: []
+  allowed-github-references: ["repo"]
   create-issue:
     title-prefix: "[Code Quality] "
     max: 1
