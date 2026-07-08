@@ -197,7 +197,11 @@ steps:
         --base "$BASE_JSON" \
         --head "$HEAD_JSON" \
         --output /tmp/repo-analysis/report.md \
-        --introduced-json /tmp/repo-analysis/introduced-diagnostics.json
+        --introduced-json /tmp/repo-analysis/introduced-diagnostics.json \
+        --introduced-issue-output /tmp/gh-aw/agent/introduced-findings-issue.md \
+        --pr-number "${{ github.event.pull_request.number }}" \
+        --pr-base-sha "${{ github.event.pull_request.base.sha }}" \
+        --pr-head-sha "${{ github.event.pull_request.head.sha }}"
 
       cat /tmp/repo-analysis/introduced-diagnostics.json > /tmp/gh-aw/agent/introduced-diagnostics.json
       cat /tmp/repo-analysis/report.md >> "$GITHUB_STEP_SUMMARY"
@@ -495,6 +499,7 @@ steps:
       path: |
         /tmp/repo-analysis/
         /tmp/gh-aw/agent/create-pr-request.json
+        /tmp/gh-aw/agent/introduced-findings-issue.md
       retention-days: 14
       if-no-files-found: warn
 ---
@@ -506,65 +511,19 @@ filtered introduced findings, written the introduced diagnostics report, run
 agentic fix generation, merged eligible patches, and applied the combined diff
 to the workspace when a reviewable patch was available.
 
-First, read `/tmp/gh-aw/agent/introduced-diagnostics.json`.
+First, read `/tmp/gh-aw/agent/introduced-diagnostics.json` and
+`/tmp/gh-aw/agent/introduced-findings-issue.md`.
 
-If the introduced diagnostics file exists, is valid, and contains introduced
-diagnostics or findings, create exactly one issue using the `create_issue` safe
-output.
+If the introduced diagnostics JSON file exists, is valid, and contains one or
+more introduced diagnostics or findings, create exactly one issue using the
+`create_issue` safe output.
 
 The issue title must be:
 
 `Summary for PR #${{ github.event.pull_request.number }}`
 
-The issue body must include these sections:
-
-## Summary
-
-A short explanation that this issue collects all AI Slop diagnostics and
-PyExamine findings introduced by this pull request in one report.
-
-## Pull Request
-
-- PR: #${{ github.event.pull_request.number }}
-- Base SHA: `${{ github.event.pull_request.base.sha }}`
-- Head SHA: `${{ github.event.pull_request.head.sha }}`
-
-## Introduced Findings
-
-A markdown table with one row per introduced diagnostic or finding. Preserve the
-order from the JSON file. The columns must be:
-
-- Rule
-- File
-- Line
-- Source
-- Message
-
-Keep messages concise enough that the table remains readable. Do not omit
-diagnostics or findings from this table.
-
-## Detailed Findings
-
-For each item in `introduced_diagnostics`, include a short subsection using this
-heading format:
-
-`### <rule> in <filePath>:<line>`
-
-Each subsection must include:
-
-- Source: `<analysisSource>`
-- Message: the diagnostic or finding message from the analyzer
-- Related locations: include related locations when `relatedLocations` is
-  present and non-empty. If none are present, write `None`.
-- Suggested follow-up: one concise, actionable recommendation based on the
-  diagnostic or finding fields. Prefer the `help` field when it is present.
-  Do not invent source code changes that are not supported by the diagnostic or
-  finding.
-
-## Counts By Source And Rule
-
-A markdown table with one row per source/rule pair and the number of introduced
-diagnostics or findings for that pair.
+The issue body must be the exact contents of
+`/tmp/gh-aw/agent/introduced-findings-issue.md`.
 
 Use only the diagnostics and findings in
 `/tmp/gh-aw/agent/introduced-diagnostics.json`. Do not create issues for
