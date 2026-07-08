@@ -535,7 +535,7 @@ output.
 Each review comment must use the item's `filePath` as `path`, the item's `line`
 as `line`, and a very brief body in this format:
 
-`<Source>: <Rule>. See full report: #aw_findings`
+`<Source>: <Rule>. See the Code Quality summary issue for details.`
 
 Use the source label from `analysisSource`, using `AI Slop` for
 `deterministic_static_analysis` and `llm_review`, `PyExamine` for `pyexamine`,
