@@ -5,7 +5,7 @@ def test_process_order_returns_status():
     result = process_order(
         {
             "id": "ord_1",
-            "payload": "{}",
+            "payload": '{"campaign": "spring", "source": "email"}',
             "value": "101",
             "status": "pending",
             "data": {
@@ -19,4 +19,18 @@ def test_process_order_returns_status():
     )
 
     assert result["status"] == "review"
+    assert result["payload_keys"] == ["campaign", "source"]
 
+
+def test_process_order_ignores_invalid_payload_metadata():
+    result = process_order(
+        {
+            "id": "ord_2",
+            "payload": "{invalid",
+            "value": "5",
+            "status": "new",
+            "data": {"attributes": {"items": []}},
+        }
+    )
+
+    assert result["payload_keys"] == []
