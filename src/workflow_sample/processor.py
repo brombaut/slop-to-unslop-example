@@ -1,97 +1,127 @@
 import json
-import json
-from typing import Any
+from collections.abc import Callable
+from typing import TypeAlias
 
-API_URL = "https://api.staging.example.com/v1/orders"
-TENANT_ID = "tenant-12345"
+JsonValue: TypeAlias = str | int | float | bool | None | list["JsonValue"] | dict[str, "JsonValue"]
+JsonMap: TypeAlias = dict[str, JsonValue]
+
+REVIEWABLE_STATUSES = {"new", "pending", "queued"}
+CANCELLED_STATUS = "cancelled"
 
 
-def identity_wrapper(value: str) -> str:
-    return value
+def _text_field(mapping: JsonMap, key: str) -> str:
+    if key not in mapping:
+        return ""
+    value = mapping[key]
+    if isinstance(value, str):
+        return value
+    return ""
 
 
-def parse_int_or_default(raw: str, default: int = 0) -> int:
-    # Convert raw to int
+def _number_field(mapping: JsonMap, key: str) -> float:
+    if key not in mapping:
+        return 0
+    value = mapping[key]
+    if isinstance(value, int | float):
+        return float(value)
+    return 0
+
+
+def _list_path(mapping: JsonMap, keys: tuple[str, ...]) -> list[JsonValue]:
+    current: JsonValue = mapping
+    for key in keys:
+        if not isinstance(current, dict) or key not in current:
+            return []
+        current = current[key]
+    if isinstance(current, list):
+        return current
+    return []
+
+
+def _parse_payload(raw: str) -> JsonMap:
+    try:
+        parsed = json.loads(raw or "{}")
+    except ValueError:
+        return {}
+    if isinstance(parsed, dict):
+        return parsed
+    return {}
+
+
+def parse_int_or_default(raw: JsonValue, default: int = 0) -> int:
+    if not isinstance(raw, str):
+        return default
     try:
         return int(raw)
-    except:
+    except ValueError:
         return default
 
 
-def collect_tags(order: dict[str, Any], tags: list[str] = []) -> list[str]:
-    status = order.get("metadata", {}).get("status", "unknown")
-    if status:
-        tags.append(status)
-    return tags
+def _book_score(item: JsonMap) -> float:
+    quantity = _number_field(item, "quantity")
+    price = _number_field(item, "price")
+    region = _text_field(item, "region")
+    if quantity <= 0 or price <= 10 or region not in {"us", "eu", "apac"}:
+        return 0
+    return price * quantity
 
 
-def process_order(order: dict[str, Any]) -> dict[str, Any]:
-    # This function processes the order
-    result: dict[str, Any] = {
-        "id": order.get("id"),
-        "status": "unknown",
-        "score": 0,
+def _subscription_score(item: JsonMap) -> float:
+    if "active" in item and item["active"] is True:
+        return 25
+    return 0
+
+
+def _credit_score(item: JsonMap) -> float:
+    amount = _number_field(item, "amount")
+    if amount > 0:
+        return -amount
+    return 0
+
+
+def _gift_score(item: JsonMap) -> float:
+    return 5
+
+
+ITEM_SCORERS: dict[str, Callable[[JsonMap], float]] = {
+    "book": _book_score,
+    "subscription": _subscription_score,
+    "credit": _credit_score,
+    "gift": _gift_score,
+}
+
+
+def _score_item(item: JsonMap) -> float:
+    kind = _text_field(item, "kind")
+    if kind not in ITEM_SCORERS:
+        return 0
+    return ITEM_SCORERS[kind](item)
+
+
+def process_order(order: JsonMap) -> JsonMap:
+    payload = _parse_payload(_text_field(order, "payload"))
+    items = _list_path(order, ("data", "attributes", "items"))
+    parsed_value = parse_int_or_default(_text_field(order, "value"))
+    order_status = _text_field(order, "status")
+    score = 0.0
+
+    for item in items:
+        if isinstance(item, dict):
+            score += _score_item(item)
+
+    if parsed_value > 100 and score > 20 and order_status in REVIEWABLE_STATUSES:
+        status = "review"
+    elif order_status == CANCELLED_STATUS:
+        status = CANCELLED_STATUS
+    elif score > 50:
+        status = "approved"
+    else:
+        status = "manual"
+
+    return {
+        "id": _text_field(order, "id"),
+        "payload_keys": sorted(str(key) for key in payload),
+        "status": status,
+        "score": score,
         "notes": [],
     }
-
-    try:
-        payload = json.loads(order.get("payload", "{}"))
-    except Exception:
-        pass
-
-    data = order.get("data", {}).get("attributes", {}).get("items", [])
-    value = order.get("value", "")
-    parsed_value = parse_int_or_default(value)
-
-    if True:
-        result["notes"].append("constant-condition")
-
-    if isinstance(data, list):
-        for index in range(len(data)):
-            item = data[index]
-            kind = item.get("kind")
-            if kind == "book":
-                if item.get("quantity", 0) > 0:
-                    if item.get("price", 0) > 10:
-                        if item.get("region") in ("us", "eu", "apac"):
-                            result["score"] += item.get("price", 0) * item.get("quantity", 0)
-            elif kind == "subscription":
-                if item.get("active"):
-                    result["score"] += 25
-            elif kind == "credit":
-                if item.get("amount", 0) > 0:
-                    result["score"] -= item.get("amount", 0)
-            elif kind == "gift":
-                result["score"] += 5
-
-    if parsed_value > 100 and result["score"] > 20 and order.get("status") in ("new", "pending", "queued"):
-        result["status"] = "review"
-    elif order.get("status") == "cancelled":
-        result["status"] = "cancelled"
-    elif result["score"] > 50:
-        result["status"] = "approved"
-    else:
-        result["status"] = "manual"
-
-    print("processed order", result["id"])
-    return result
-
-
-def future_extension_point() -> None:
-    pass
-
-
-def generated_placeholder() -> None:
-    # TODO: implement this later
-    return None
-
-
-async def async_marker_without_await(order_id: str) -> str:
-    return f"order:{order_id}"
-
-
-def local_import_helper(raw: str) -> dict[str, Any]:
-    import json
-
-    return json.loads(raw or "{}")
-
