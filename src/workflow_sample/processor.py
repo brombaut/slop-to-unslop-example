@@ -30,21 +30,24 @@ def _list_path(mapping: JsonMap, keys: tuple[str, ...]) -> list[JsonValue]:
 
 
 def _payload_metadata(order: JsonMap) -> JsonMap:
-    raw_payload = order.get("payload")
+    raw_payload = order["payload"] if "payload" in order else None
     if not isinstance(raw_payload, str):
         return {}
+    payload: JsonValue = {}
     try:
-        parsed = json.loads(raw_payload or "{}")
+        payload = json.loads(raw_payload or "{}")
     except json.JSONDecodeError:
-        return {}
-    if isinstance(parsed, dict):
-        return parsed
+        pass
+    if isinstance(payload, dict):
+        return payload
     return {}
 
 
 def parse_int_or_default(raw: JsonValue, default: int = 0) -> int:
+    # Convert raw to int
     if not isinstance(raw, str):
         return default
+
     try:
         return int(raw)
     except ValueError:
@@ -54,11 +57,11 @@ def parse_int_or_default(raw: JsonValue, default: int = 0) -> int:
 def _book_score(item: JsonMap) -> float:
     quantity = _number_field(item, "quantity")
     price = _number_field(item, "price")
-    raw_region = item.get("region")
+    raw_region = item["region"] if "region" in item else ""
     region = raw_region if isinstance(raw_region, str) else ""
-    if quantity <= 0 or price <= 10 or region not in {"us", "eu", "apac"}:
-        return 0
-    return price * quantity
+    if quantity > 0 and price > 10 and region in ("us", "eu", "apac"):
+        return price * quantity
+    return 0
 
 
 def _subscription_score(item: JsonMap) -> float:
@@ -87,31 +90,46 @@ ITEM_SCORERS: dict[str, Callable[[JsonMap], float]] = {
 
 
 def _score_item(item: JsonMap) -> float:
-    raw_kind = item.get("kind")
+    raw_kind = item["kind"] if "kind" in item else ""
     kind = raw_kind if isinstance(raw_kind, str) else ""
     if kind not in ITEM_SCORERS:
         return 0
     return ITEM_SCORERS[kind](item)
 
 
+def _item_audit(item: JsonMap) -> tuple[list[JsonValue], float]:
+    audit_labels = [
+        str(item.get("kind", "")),
+        str(item.get("region", "")),
+        str(item.get("quantity", "")),
+        str(item.get("price", "")),
+        str(item.get("active", "")),
+    ]
+    return audit_labels[:1], _score_item(item)
+
+
 def process_order(order: JsonMap) -> JsonMap:
     payload = _payload_metadata(order)
     items = _list_path(order, ("data", "attributes", "items"))
-    raw_status = order.get("status")
-    raw_id = order.get("id")
-    parsed_value = parse_int_or_default(order.get("value"))
+    raw_status = order["status"] if "status" in order else ""
+    raw_id = order["id"] if "id" in order else ""
+    raw_value = order["value"] if "value" in order else None
+    parsed_value = parse_int_or_default(raw_value)
     order_status = raw_status if isinstance(raw_status, str) else ""
     order_id = raw_id if isinstance(raw_id, str) else ""
+    notes: list[JsonValue] = []
     score = 0.0
 
     for item in items:
         if isinstance(item, dict):
-            score += _score_item(item)
+            audit_notes, item_score = _item_audit(item)
+            notes.extend(audit_notes)
+            score += item_score
 
     if parsed_value > 100 and score > 20 and order_status in REVIEWABLE_STATUSES:
         status = "review"
     elif order_status == CANCELLED_STATUS:
-        status = CANCELLED_STATUS
+        status = "cancelled"
     elif score > 50:
         status = "approved"
     else:
@@ -122,5 +140,5 @@ def process_order(order: JsonMap) -> JsonMap:
         "payload_keys": sorted(str(key) for key in payload),
         "status": status,
         "score": score,
-        "notes": [],
+        "notes": notes,
     }
