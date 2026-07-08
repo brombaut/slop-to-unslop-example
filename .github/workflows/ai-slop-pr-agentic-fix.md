@@ -45,23 +45,246 @@ safe-outputs:
   threat-detection: false
   mentions: false
   activation-comments: false
-  allowed-github-references: ["repo"]
-  create-issue:
-    title-prefix: "[Code Quality] "
-    max: 1
-    footer: false
-  create-pull-request-review-comment:
-  create-pull-request:
-    title-prefix: "Apply code quality remediation: "
-    draft: false
-    max: 1
-    base-branch: ${{ github.event.pull_request.head.ref }}
-    allowed-branches:
-      - code-quality/agentic-fix-pr-*
-    fallback-as-issue: false
-    auto-close-issue: false
-    max-patch-files: 100
-    max-patch-size: 4096
+  noop:
+    report-as-issue: false
+
+jobs:
+  publish_code_quality_results:
+    name: Publish Code Quality Results
+    needs: agent
+    if: needs.agent.result == 'success' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Download code quality artifacts
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: code-quality-pr-agentic-fix-${{ github.run_id }}
+          path: /tmp/code-quality-artifacts
+
+      - name: Checkout original PR branch
+        uses: actions/checkout@v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Publish report, comments, and cleanup PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ORIGINAL_PR_NUMBER: ${{ github.event.pull_request.number }}
+          ORIGINAL_PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          ORIGINAL_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          artifact_root="/tmp/code-quality-artifacts"
+          repo_analysis_dir="${artifact_root}/repo-analysis"
+          agent_dir="${artifact_root}/gh-aw/agent"
+
+          if [[ ! -d "$repo_analysis_dir" ]]; then
+            repo_analysis_dir="$(find "$artifact_root" -type d -name repo-analysis | head -1)"
+          fi
+          if [[ ! -d "$agent_dir" ]]; then
+            agent_dir="$(find "$artifact_root" -type d -path '*/gh-aw/agent' | head -1)"
+          fi
+
+          introduced_json="${agent_dir}/introduced-diagnostics.json"
+          if [[ ! -f "$introduced_json" ]]; then
+            introduced_json="${repo_analysis_dir}/introduced-diagnostics.json"
+          fi
+          issue_body="${agent_dir}/introduced-findings-issue.md"
+          remediation_status="${agent_dir}/remediation-status.json"
+          create_pr_request="${agent_dir}/create-pr-request.json"
+          cleanup_body="${repo_analysis_dir}/cleanup-pr-body.md"
+          combined_diff="${repo_analysis_dir}/merged/combined.diff"
+
+          issue_url=""
+          introduced_count=0
+          if [[ -f "$introduced_json" ]]; then
+            introduced_count="$(jq '(.introduced_diagnostics // []) | length' "$introduced_json")"
+          fi
+
+          if [[ "$introduced_count" -gt 0 && -f "$issue_body" ]]; then
+            issue_url="$(gh issue create \
+              --title "[Code Quality] Summary for PR #${ORIGINAL_PR_NUMBER}" \
+              --body-file "$issue_body")"
+            echo "Created findings issue: ${issue_url}"
+          fi
+
+          if [[ -n "$issue_url" && -f "$cleanup_body" ]]; then
+            python - "$cleanup_body" "$issue_url" <<'PY'
+          from pathlib import Path
+          import sys
+
+          path = Path(sys.argv[1])
+          issue_url = sys.argv[2]
+          body = path.read_text(encoding="utf-8")
+          body = body.replace("#aw_findings", issue_url)
+          path.write_text(body, encoding="utf-8")
+          PY
+          fi
+
+          if [[ "$introduced_count" -gt 0 ]]; then
+            python - "$introduced_json" "$remediation_status" "$issue_url" <<'PY'
+          import json
+          import os
+          import subprocess
+          import sys
+          from pathlib import Path
+          from typing import Any
+
+          introduced_path = Path(sys.argv[1])
+          status_path = Path(sys.argv[2])
+          issue_url = sys.argv[3]
+          repo = os.environ["GITHUB_REPOSITORY"]
+          pr_number = os.environ["ORIGINAL_PR_NUMBER"]
+          head_sha = os.environ["ORIGINAL_PR_HEAD_SHA"]
+
+          def read_object(path: Path) -> dict[str, Any]:
+              if not path.exists():
+                  return {}
+              try:
+                  value = json.loads(path.read_text(encoding="utf-8"))
+              except json.JSONDecodeError:
+                  return {}
+              return value if isinstance(value, dict) else {}
+
+          def source_label(source: Any) -> str:
+              if source in {"deterministic_static_analysis", "llm_review"}:
+                  return "AI Slop"
+              if source == "pyexamine":
+                  return "PyExamine"
+              return "Finding"
+
+          introduced = read_object(introduced_path)
+          statuses = read_object(status_path).get("byDiagnosticId")
+          if not isinstance(statuses, dict):
+              statuses = {}
+
+          for diagnostic in introduced.get("introduced_diagnostics") or []:
+              if not isinstance(diagnostic, dict):
+                  continue
+              path = diagnostic.get("filePath")
+              line = diagnostic.get("line")
+              rule = diagnostic.get("rule") or "code quality finding"
+              diagnostic_id = diagnostic.get("diagnosticId")
+              if not isinstance(path, str) or not isinstance(line, int):
+                  continue
+
+              status = {}
+              if isinstance(diagnostic_id, str):
+                  candidate = statuses.get(diagnostic_id)
+                  if isinstance(candidate, dict):
+                      status = candidate
+              comment_status = status.get("commentStatus")
+              if not isinstance(comment_status, str) or not comment_status:
+                  comment_status = "Remediation status unavailable."
+
+              details = f" See full report: {issue_url}" if issue_url else ""
+              body = f"{source_label(diagnostic.get('analysisSource'))}: {rule}. {comment_status}{details}"
+              result = subprocess.run(
+                  [
+                      "gh",
+                      "api",
+                      f"/repos/{repo}/pulls/{pr_number}/comments",
+                      "-f",
+                      f"body={body}",
+                      "-f",
+                      f"commit_id={head_sha}",
+                      "-f",
+                      f"path={path}",
+                      "-F",
+                      f"line={line}",
+                      "-f",
+                      "side=RIGHT",
+                  ],
+                  text=True,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.PIPE,
+                  check=False,
+              )
+              if result.returncode != 0:
+                  print(
+                      f"warning: could not create review comment for {path}:{line}: {result.stderr.strip()}",
+                      file=sys.stderr,
+                  )
+          PY
+          fi
+
+          should_create_pr="false"
+          if [[ -f "$create_pr_request" ]]; then
+            should_create_pr="$(jq -r '.shouldCreatePr == true' "$create_pr_request")"
+          fi
+
+          if [[ "$should_create_pr" != "true" ]]; then
+            echo "No cleanup PR requested."
+            exit 0
+          fi
+
+          if [[ ! -s "$combined_diff" || ! -f "$cleanup_body" ]]; then
+            echo "No cleanup PR created because the merged diff or PR body is missing."
+            exit 0
+          fi
+
+          cleanup_branch="$(jq -r '.branch // empty' "$create_pr_request")"
+          if [[ -z "$cleanup_branch" ]]; then
+            echo "No cleanup PR created because create-pr-request.json did not include a branch."
+            exit 0
+          fi
+
+          git switch -c "$cleanup_branch"
+          if ! git apply --check "$combined_diff"; then
+            echo "No cleanup PR created because the combined diff did not apply cleanly."
+            exit 0
+          fi
+
+          git apply "$combined_diff"
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No cleanup PR created because the combined diff produced no changes."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Apply generated code quality remediation for PR #${ORIGINAL_PR_NUMBER}"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch origin "+refs/heads/${cleanup_branch}:refs/remotes/origin/${cleanup_branch}" || true
+          git push --force-with-lease origin "$cleanup_branch"
+
+          pr_title="Apply code quality remediation: PR #${ORIGINAL_PR_NUMBER}"
+          existing_pr_number="$(gh pr list \
+            --head "$cleanup_branch" \
+            --base "$ORIGINAL_PR_HEAD_REF" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [[ -n "$existing_pr_number" ]]; then
+            gh pr edit "$existing_pr_number" --title "$pr_title" --body-file "$cleanup_body"
+            pr_url="$(gh pr view "$existing_pr_number" --json url --jq .url)"
+          else
+            pr_url="$(gh pr create \
+              --base "$ORIGINAL_PR_HEAD_REF" \
+              --head "$cleanup_branch" \
+              --title "$pr_title" \
+              --body-file "$cleanup_body")"
+          fi
+
+          {
+            echo "## Published Code Quality Results"
+            echo
+            if [[ -n "$issue_url" ]]; then
+              echo "- Findings issue: ${issue_url}"
+            fi
+            echo "- Cleanup PR: ${pr_url}"
+          } >> "$GITHUB_STEP_SUMMARY"
 
 steps:
   - name: Initialize workflow state
@@ -503,7 +726,7 @@ steps:
         echo
         echo "## Cleanup PR"
         echo
-        echo "Prepared a cleanup PR request for the safe-outputs create-pull-request handler."
+        echo "Prepared a cleanup PR request for the deterministic publish job."
         echo
         echo "The cleanup PR will target \`${ORIGINAL_PR_HEAD_REF}\`, the source branch of PR #${ORIGINAL_PR_NUMBER}."
       } >> "$GITHUB_STEP_SUMMARY"
@@ -655,86 +878,25 @@ steps:
       path: |
         /tmp/repo-analysis/
         /tmp/gh-aw/agent/create-pr-request.json
+        /tmp/gh-aw/agent/introduced-diagnostics.json
         /tmp/gh-aw/agent/introduced-findings-issue.md
         /tmp/gh-aw/agent/remediation-status.json
       retention-days: 14
       if-no-files-found: warn
+
+  - name: Skip final gh-aw agent phase
+    if: always()
+    run: |
+      set -euo pipefail
+      safe_outputs="${RUNNER_TEMP}/gh-aw/safeoutputs/outputs.jsonl"
+      mkdir -p "$(dirname "$safe_outputs")"
+      printf '{"type":"noop","message":"Code quality reporting and cleanup PR creation are handled by the deterministic publish job."}\n' >> "$safe_outputs"
 ---
 
 # Code Quality PR Agentic Fix
 
-The deterministic workflow steps have already scanned the PR base and head,
-filtered introduced findings, written the introduced diagnostics report, run
-agentic fix generation, merged eligible patches, and applied the combined diff
-to the workspace when a reviewable patch was available.
+The deterministic workflow steps already handle scanning, remediation patch
+generation, artifact upload, issue reporting, inline comments, cleanup branch
+publishing, and cleanup PR creation.
 
-First, read `/tmp/gh-aw/agent/introduced-diagnostics.json`,
-`/tmp/gh-aw/agent/introduced-findings-issue.md`, and
-`/tmp/gh-aw/agent/remediation-status.json`.
-
-If the introduced diagnostics JSON file exists, is valid, and contains one or
-more introduced diagnostics or findings, create exactly one issue using the
-`create_issue` safe output.
-
-The issue title must be:
-
-`Summary for PR #${{ github.event.pull_request.number }}`
-
-The issue body must be the exact contents of
-`/tmp/gh-aw/agent/introduced-findings-issue.md`.
-
-Set the issue `temporary_id` to `#aw_findings`.
-
-Then create one inline pull request review comment for each item in
-`introduced_diagnostics` using the `create_pull_request_review_comment` safe
-output.
-
-Each review comment must use the item's `filePath` as `path`, the item's `line`
-as `line`, and a very brief body in this format:
-
-`<Source>: <Rule>. <Remediation status> See the Code Quality summary issue for details.`
-
-Look up `<Remediation status>` by matching the item's `diagnosticId` against
-`byDiagnosticId` in `/tmp/gh-aw/agent/remediation-status.json` and using that
-entry's `commentStatus`. If there is no matching remediation status, use
-`Remediation status unavailable.`
-
-Use the source label from `analysisSource`, using `AI Slop` for
-`deterministic_static_analysis` and `llm_review`, `PyExamine` for `pyexamine`,
-and `Finding` otherwise. Do not include the full diagnostic message in the
-review comment.
-
-Use only the diagnostics and findings in
-`/tmp/gh-aw/agent/introduced-diagnostics.json`. Do not create issues for
-existing base diagnostics or findings, resolved diagnostics or findings,
-code-health regressions, items outside that JSON file, or general
-recommendations.
-
-Next, read `/tmp/gh-aw/agent/create-pr-request.json`.
-
-If the create-PR request file is missing, invalid, or has `shouldCreatePr` set
-to anything other than `true`, do not call `create_pull_request`.
-
-If `shouldCreatePr` is `true`, call `create_pull_request` exactly once using
-only these fields from the JSON file:
-
-- `title`
-- `body`
-- `branch`
-
-The `branch` value in `/tmp/gh-aw/agent/create-pr-request.json` is
-authoritative. Before calling `create_pull_request`, check out exactly that
-branch with:
-
-`git checkout <branch from create-pr-request.json>`
-
-Use the same JSON `branch` value as the `create_pull_request` branch. Do not
-use `git branch --show-current`, the current checkout, or any inferred branch
-name to choose or replace the cleanup PR branch.
-
-Do not edit repository files, create additional branches with git commands,
-open additional pull requests, create comments other than the inline review
-comments described above, or change the prepared title/body/branch. Apart from
-the single scan issue described above, do not create issues. The pull request
-base branch is configured in `safe-outputs.create-pull-request` and targets the
-original PR head branch.
+No agent action is required for this workflow.
