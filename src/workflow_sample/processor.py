@@ -38,10 +38,10 @@ def _list_path(mapping: JsonMap, keys: tuple[str, ...]) -> list[JsonValue]:
     return []
 
 
-def _parse_payload(raw: str) -> JsonMap:
+def _payload_metadata(order: JsonMap) -> JsonMap:
     try:
-        parsed = json.loads(raw or "{}")
-    except ValueError:
+        parsed = json.loads(_text_field(order, "payload") or "{}")
+    except json.JSONDecodeError:
         return {}
     if isinstance(parsed, dict):
         return parsed
@@ -99,7 +99,7 @@ def _score_item(item: JsonMap) -> float:
 
 
 def process_order(order: JsonMap) -> JsonMap:
-    payload = _parse_payload(_text_field(order, "payload"))
+    payload = _payload_metadata(order)
     items = _list_path(order, ("data", "attributes", "items"))
     parsed_value = parse_int_or_default(_text_field(order, "value"))
     order_status = _text_field(order, "status")
