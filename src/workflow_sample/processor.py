@@ -9,15 +9,6 @@ REVIEWABLE_STATUSES = {"new", "pending", "queued"}
 CANCELLED_STATUS = "cancelled"
 
 
-def _text_field(mapping: JsonMap, key: str) -> str:
-    if key not in mapping:
-        return ""
-    value = mapping[key]
-    if isinstance(value, str):
-        return value
-    return ""
-
-
 def _number_field(mapping: JsonMap, key: str) -> float:
     if key not in mapping:
         return 0
@@ -39,8 +30,11 @@ def _list_path(mapping: JsonMap, keys: tuple[str, ...]) -> list[JsonValue]:
 
 
 def _payload_metadata(order: JsonMap) -> JsonMap:
+    raw_payload = order.get("payload")
+    if not isinstance(raw_payload, str):
+        return {}
     try:
-        parsed = json.loads(_text_field(order, "payload") or "{}")
+        parsed = json.loads(raw_payload or "{}")
     except json.JSONDecodeError:
         return {}
     if isinstance(parsed, dict):
@@ -60,7 +54,8 @@ def parse_int_or_default(raw: JsonValue, default: int = 0) -> int:
 def _book_score(item: JsonMap) -> float:
     quantity = _number_field(item, "quantity")
     price = _number_field(item, "price")
-    region = _text_field(item, "region")
+    raw_region = item.get("region")
+    region = raw_region if isinstance(raw_region, str) else ""
     if quantity <= 0 or price <= 10 or region not in {"us", "eu", "apac"}:
         return 0
     return price * quantity
@@ -92,7 +87,8 @@ ITEM_SCORERS: dict[str, Callable[[JsonMap], float]] = {
 
 
 def _score_item(item: JsonMap) -> float:
-    kind = _text_field(item, "kind")
+    raw_kind = item.get("kind")
+    kind = raw_kind if isinstance(raw_kind, str) else ""
     if kind not in ITEM_SCORERS:
         return 0
     return ITEM_SCORERS[kind](item)
@@ -101,8 +97,11 @@ def _score_item(item: JsonMap) -> float:
 def process_order(order: JsonMap) -> JsonMap:
     payload = _payload_metadata(order)
     items = _list_path(order, ("data", "attributes", "items"))
-    parsed_value = parse_int_or_default(_text_field(order, "value"))
-    order_status = _text_field(order, "status")
+    raw_status = order.get("status")
+    raw_id = order.get("id")
+    parsed_value = parse_int_or_default(order.get("value"))
+    order_status = raw_status if isinstance(raw_status, str) else ""
+    order_id = raw_id if isinstance(raw_id, str) else ""
     score = 0.0
 
     for item in items:
@@ -119,7 +118,7 @@ def process_order(order: JsonMap) -> JsonMap:
         status = "manual"
 
     return {
-        "id": _text_field(order, "id"),
+        "id": order_id,
         "payload_keys": sorted(str(key) for key in payload),
         "status": status,
         "score": score,
