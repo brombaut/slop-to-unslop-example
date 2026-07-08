@@ -36,7 +36,7 @@ def _payload_metadata(order: JsonMap) -> JsonMap:
     payload: JsonValue = {}
     try:
         payload = json.loads(raw_payload or "{}")
-    except Exception:
+    except json.JSONDecodeError:
         pass
     if isinstance(payload, dict):
         return payload
@@ -97,6 +97,17 @@ def _score_item(item: JsonMap) -> float:
     return ITEM_SCORERS[kind](item)
 
 
+def _item_audit(item: JsonMap) -> tuple[list[JsonValue], float]:
+    audit_labels = [
+        str(item.get("kind", "")),
+        str(item.get("region", "")),
+        str(item.get("quantity", "")),
+        str(item.get("price", "")),
+        str(item.get("active", "")),
+    ]
+    return audit_labels[:1], _score_item(item)
+
+
 def process_order(order: JsonMap) -> JsonMap:
     payload = _payload_metadata(order)
     items = _list_path(order, ("data", "attributes", "items"))
@@ -111,15 +122,9 @@ def process_order(order: JsonMap) -> JsonMap:
 
     for item in items:
         if isinstance(item, dict):
-            audit_labels = [
-                str(item.get("kind", "")),
-                str(item.get("region", "")),
-                str(item.get("quantity", "")),
-                str(item.get("price", "")),
-                str(item.get("active", "")),
-            ]
-            notes.extend(audit_labels[:1])
-            score += _score_item(item)
+            audit_notes, item_score = _item_audit(item)
+            notes.extend(audit_notes)
+            score += item_score
 
     if parsed_value > 100 and score > 20 and order_status in REVIEWABLE_STATUSES:
         status = "review"
