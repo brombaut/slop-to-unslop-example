@@ -12,13 +12,13 @@
         "analysisSource": "llm_review",
         "category": "AI Slop",
         "column": 1,
-        "detail": "confidence=0.98; evidence=Both functions require active=true and suspended=false on the customer/account record.; Both functions require subtotal >= 100 via _amount(..., \"subtotal\").; Both functions require tier to be gold or platinum and country to be US or CA.; The second function is a boolean-expression rewrite of the first function's early-return eligibility checks, indicating the same offer-eligibility rule.",
-        "diagnosticId": "aislop:python-semantic-duplicate-business-logic:9192059ebe52",
+        "detail": "confidence=0.98; evidence=Both functions require active=true and suspended=false on the customer/account record.; Both require subtotal >= 100 using _amount(..., \"subtotal\").; Both require tier to be gold or platinum.; Both require country to be US or CA.",
+        "diagnosticId": "aislop:python-semantic-duplicate-business-logic:0fd8c75e5ff7",
         "engine": "ai-slop",
         "filePath": "src/workflow_sample/offers.py",
         "help": "Reuse one implementation or extract the shared validator, mapper, predicate, or workflow instead of carrying parallel logic.",
         "line": 47,
-        "message": "`qualifies_for_trial_discount` and `can_receive_intro_offer` implement the same eligibility business rule with only structural/naming differences, so they are strong candidates for consolidation.",
+        "message": "These functions implement the same offer-eligibility business rule and should be consolidated into a shared predicate.",
         "relatedLocations": [
           {
             "column": 1,
@@ -67,11 +67,11 @@
         "analysisSource": "deterministic_static_analysis",
         "category": "AI Slop",
         "column": 1,
-        "diagnosticId": "aislop:python-broad-except:73d471809da6",
+        "diagnosticId": "aislop:python-broad-except:2378b64dfbb3",
         "engine": "ai-slop",
         "filePath": "src/workflow_sample/processor.py",
         "help": "Narrow the exception class, log with context, or re-raise.",
-        "line": 45,
+        "line": 39,
         "message": "Broad exception handler silently drops failures.",
         "rule": "ai-slop/python-broad-except"
       },
@@ -79,11 +79,11 @@
         "analysisSource": "deterministic_static_analysis",
         "category": "AI Slop",
         "column": 0,
-        "diagnosticId": "aislop:swallowed-exception:7834e1a4a387",
+        "diagnosticId": "aislop:swallowed-exception:49a1dac7afb0",
         "engine": "ai-slop",
         "filePath": "src/workflow_sample/processor.py",
         "help": "Handle errors explicitly: log with context, rethrow, or return an error value",
-        "line": 45,
+        "line": 39,
         "message": "Bare except with pass swallows errors silently",
         "rule": "ai-slop/swallowed-exception"
       },
@@ -91,13 +91,13 @@
         "analysisSource": "llm_review",
         "category": "AI Slop",
         "column": 5,
-        "detail": "confidence=0.99; evidence=tests/test_offers.py:24 asserts `result == result`, which is tautological and will pass regardless of `qualifies_for_trial_discount` output; The production function has specific boolean eligibility conditions, so the test should assert an expected True/False outcome for the provided customer/invoice data",
-        "diagnosticId": "aislop:python-llm-assertion-correctness:5a13e859faeb",
+        "detail": "confidence=0.99; evidence=The test's only assertion is `assert result == result`, which is tautologically true and does not verify the function's behavior.; `qualifies_for_trial_discount(...)` returns a boolean based on specific eligibility conditions, but the test never asserts the expected boolean outcome for the provided qualifying inputs.",
+        "diagnosticId": "aislop:python-llm-assertion-correctness:ae925bf73786",
         "engine": "ai-slop",
         "filePath": "tests/test_offers.py",
         "help": "Replace tautological, interaction-only, or bare truthiness checks with assertions over externally visible behavior and meaningful expected values.",
         "line": 24,
-        "message": "Test calls `qualifies_for_trial_discount` but only asserts the result equals itself, so it does not verify the discount qualification behavior. Assert the expected boolean outcome instead.",
+        "message": "The test exercises `qualifies_for_trial_discount` but its only assertion compares the result to itself, so it will pass regardless of correctness. Replace it with an assertion of the expected outcome, e.g. `assert result is True` for these ",
         "relatedLocations": [
           {
             "column": 1,
@@ -143,20 +143,20 @@
     },
     "engines": {
       "ai-slop": {
-        "elapsed": 19563,
+        "elapsed": 22236,
         "issues": 6,
         "llmReview": {
-          "candidates": 4,
+          "candidates": 5,
           "enabled": true,
           "flagged": 2,
           "model": "gpt-5.4",
           "provider": "openai-compatible",
-          "reviewed": 4,
+          "reviewed": 5,
           "skipped": 0,
           "usage": {
-            "completionTokens": 773,
-            "promptTokens": 4829,
-            "totalTokens": 5602
+            "completionTokens": 920,
+            "promptTokens": 5930,
+            "totalTokens": 6850
           }
         },
         "skipped": false
@@ -169,13 +169,11 @@
     },
     "label": "Needs Work",
     "schemaVersion": "1",
-    "score": 64,
+    "score": 69,
     "scoreable": true,
     "summary": {
-      "elapsed": "19.6s",
-      "errors": 1,
-      "files": 5,
-      "warnings": 5
+      "elapsed": "22.3s",
+      "files": 5
     },
     "version": "python-aislop-engine"
   },
@@ -194,12 +192,44 @@
       "until": null
     }
   },
+  "classic_smells": {
+    "enabled": true,
+    "findings": [
+      {
+        "description": "Method 'process_order' makes 5 calls to 'item' but only 0 local calls in src/workflow_sample/processor.py",
+        "diagnosticId": "pyexamine:feature-envy:974164491a07",
+        "filePath": "src/workflow_sample/processor.py",
+        "line": 100,
+        "moduleClass": "process_order",
+        "name": "Feature Envy",
+        "rule": "pyexamine/feature-envy",
+        "type": "code"
+      }
+    ],
+    "schemaVersion": "1",
+    "summary": {
+      "architectural": 0,
+      "byName": {
+        "Feature Envy": 1
+      },
+      "code": 1,
+      "structural": 0,
+      "total": 1
+    },
+    "tool": "Classic Smells",
+    "types": [
+      "code",
+      "architectural",
+      "structural"
+    ],
+    "version": "0.2.2"
+  },
   "hotspots": [
     {
-      "activity_score": 0.26666666666666666,
-      "code_line_count": 107,
+      "activity_score": 0.29411764705882354,
+      "code_line_count": 110,
       "formula": "activity_score * size_score",
-      "hotspot_score": 0.26666666666666666,
+      "hotspot_score": 0.29411764705882354,
       "path": "src/workflow_sample/processor.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
@@ -208,14 +238,14 @@
         "low revision activity",
         "large Python file"
       ],
-      "revision_count": 4,
+      "revision_count": 5,
       "size_score": 1.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.058823529411764705,
       "code_line_count": 61,
       "formula": "activity_score * size_score",
-      "hotspot_score": 0.03800623052959501,
+      "hotspot_score": 0.032620320855614976,
       "path": "src/workflow_sample/offers.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
@@ -225,13 +255,13 @@
         "medium Python file"
       ],
       "revision_count": 1,
-      "size_score": 0.5700934579439252
+      "size_score": 0.5545454545454546
     },
     {
-      "activity_score": 0.13333333333333333,
+      "activity_score": 0.11764705882352941,
       "code_line_count": 30,
       "formula": "activity_score * size_score",
-      "hotspot_score": 0.037383177570093455,
+      "hotspot_score": 0.0320855614973262,
       "path": "tests/test_processor.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
@@ -241,13 +271,13 @@
         "small Python file"
       ],
       "revision_count": 2,
-      "size_score": 0.2803738317757009
+      "size_score": 0.2727272727272727
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.058823529411764705,
       "code_line_count": 38,
       "formula": "activity_score * size_score",
-      "hotspot_score": 0.023676012461059187,
+      "hotspot_score": 0.020320855614973262,
       "path": "tests/test_offers.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
@@ -257,13 +287,13 @@
         "small Python file"
       ],
       "revision_count": 1,
-      "size_score": 0.35514018691588783
+      "size_score": 0.34545454545454546
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.058823529411764705,
       "code_line_count": 2,
       "formula": "activity_score * size_score",
-      "hotspot_score": 0.001246105919003115,
+      "hotspot_score": 0.0010695187165775401,
       "path": "src/workflow_sample/__init__.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
@@ -273,7 +303,7 @@
         "small Python file"
       ],
       "revision_count": 1,
-      "size_score": 0.018691588785046728
+      "size_score": 0.01818181818181818
     },
     {
       "activity_score": 1.0,
@@ -288,11 +318,11 @@
         "high revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 15,
+      "revision_count": 17,
       "size_score": 0.0
     },
     {
-      "activity_score": 1.0,
+      "activity_score": 0.9411764705882353,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -304,11 +334,11 @@
         "high revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 15,
+      "revision_count": 16,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.7333333333333333,
+      "activity_score": 0.6470588235294118,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -324,7 +354,7 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.7333333333333333,
+      "activity_score": 0.6470588235294118,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -340,7 +370,7 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.3333333333333333,
+      "activity_score": 0.29411764705882354,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -356,7 +386,7 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.3333333333333333,
+      "activity_score": 0.29411764705882354,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -372,7 +402,7 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.2,
+      "activity_score": 0.23529411764705882,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
@@ -384,15 +414,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 3,
+      "revision_count": 4,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.13333333333333333,
+      "activity_score": 0.17647058823529413,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".github/workflows/ai-slop-pr-analysis.yml",
+      "path": "demo_artifacts/repo_codehealth_analysis_0_main.json",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 13,
@@ -400,15 +430,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 2,
+      "revision_count": 3,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.13333333333333333,
+      "activity_score": 0.17647058823529413,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": "docs/repo-health-pr-analysis-gh-aw-draft.md",
+      "path": "demo_artifacts/repo_codehealth_analysis_1_feature_sloppy.json",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 14,
@@ -416,15 +446,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 2,
+      "revision_count": 3,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.13333333333333333,
+      "activity_score": 0.17647058823529413,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": "src/workflow_sample/reporting.py",
+      "path": "demo_artifacts/repo_codehealth_analysis_2_feature_unslopped.json",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 15,
@@ -432,15 +462,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 2,
+      "revision_count": 3,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.11764705882352941,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".gitattributes",
+      "path": ".github/workflows/ai-slop-pr-analysis.yml",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 16,
@@ -448,15 +478,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 1,
+      "revision_count": 2,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.11764705882352941,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".github/aw/actions-lock.json",
+      "path": "docs/repo-health-pr-analysis-gh-aw-draft.md",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 17,
@@ -464,15 +494,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 1,
+      "revision_count": 2,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.11764705882352941,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".github/workflows/{repo-health-pr-analysis.yml => ai-slop-pr-analysis.yml}",
+      "path": "src/workflow_sample/reporting.py",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 18,
@@ -480,15 +510,15 @@
         "low revision activity",
         "no Python code-size metric available"
       ],
-      "revision_count": 1,
+      "revision_count": 2,
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.058823529411764705,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": ".gitignore",
+      "path": ".gitattributes",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 19,
@@ -500,11 +530,11 @@
       "size_score": 0.0
     },
     {
-      "activity_score": 0.06666666666666667,
+      "activity_score": 0.058823529411764705,
       "code_line_count": 0,
       "formula": "activity_score * size_score",
       "hotspot_score": 0.0,
-      "path": "pyproject.toml",
+      "path": ".github/aw/actions-lock.json",
       "path_format": "posix",
       "path_kind": "repository_relative",
       "rank": 20,
@@ -514,58 +544,79 @@
       ],
       "revision_count": 1,
       "size_score": 0.0
+    },
+    {
+      "activity_score": 0.058823529411764705,
+      "code_line_count": 0,
+      "formula": "activity_score * size_score",
+      "hotspot_score": 0.0,
+      "path": ".github/workflows/{repo-health-pr-analysis.yml => ai-slop-pr-analysis.yml}",
+      "path_format": "posix",
+      "path_kind": "repository_relative",
+      "rank": 21,
+      "reasons": [
+        "low revision activity",
+        "no Python code-size metric available"
+      ],
+      "revision_count": 1,
+      "size_score": 0.0
+    },
+    {
+      "activity_score": 0.058823529411764705,
+      "code_line_count": 0,
+      "formula": "activity_score * size_score",
+      "hotspot_score": 0.0,
+      "path": ".gitignore",
+      "path_format": "posix",
+      "path_kind": "repository_relative",
+      "rank": 22,
+      "reasons": [
+        "low revision activity",
+        "no Python code-size metric available"
+      ],
+      "revision_count": 1,
+      "size_score": 0.0
+    },
+    {
+      "activity_score": 0.058823529411764705,
+      "code_line_count": 0,
+      "formula": "activity_score * size_score",
+      "hotspot_score": 0.0,
+      "path": "demo_artifacts/slop-to-unslop-demo.mp4",
+      "path_format": "posix",
+      "path_kind": "repository_relative",
+      "rank": 23,
+      "reasons": [
+        "low revision activity",
+        "no Python code-size metric available"
+      ],
+      "revision_count": 1,
+      "size_score": 0.0
+    },
+    {
+      "activity_score": 0.058823529411764705,
+      "code_line_count": 0,
+      "formula": "activity_score * size_score",
+      "hotspot_score": 0.0,
+      "path": "pyproject.toml",
+      "path_format": "posix",
+      "path_kind": "repository_relative",
+      "rank": 24,
+      "reasons": [
+        "low revision activity",
+        "no Python code-size metric available"
+      ],
+      "revision_count": 1,
+      "size_score": 0.0
     }
   ],
-  "classic_smells": {
-    "enabled": true,
-    "findings": [
-      {
-        "description": "Method '_text_field' called in 4 different contexts across 6 locations in src/workflow_sample/processor.py",
-        "diagnosticId": "pyexamine:potential-shotgun-surgery:f2f60826ee7b",
-        "filePath": "src/workflow_sample/processor.py",
-        "line": 44,
-        "moduleClass": "_text_field",
-        "name": "Potential Shotgun Surgery",
-        "rule": "pyexamine/potential-shotgun-surgery",
-        "type": "code"
-      },
-      {
-        "description": "Method 'process_order' makes 5 calls to 'item' but only 0 local calls in src/workflow_sample/processor.py",
-        "diagnosticId": "pyexamine:feature-envy:4dd1e7e2fab4",
-        "filePath": "src/workflow_sample/processor.py",
-        "line": 103,
-        "moduleClass": "process_order",
-        "name": "Feature Envy",
-        "rule": "pyexamine/feature-envy",
-        "type": "code"
-      }
-    ],
-    "schemaVersion": "1",
-    "summary": {
-      "architectural": 0,
-      "byName": {
-        "Feature Envy": 1,
-        "Potential Shotgun Surgery": 1
-      },
-      "code": 2,
-      "structural": 0,
-      "total": 2
-    },
-    "tool": "Classic Smells",
-    "types": [
-      "code",
-      "architectural",
-      "structural"
-    ],
-    "version": "0.2.2"
-  },
   "repository": {
     "analysis_window": {
       "description": "Entire available Git history.",
       "since": null,
       "until": null
     },
-    "analyzed_at": "2026-07-08T16:08:18.881397Z",
+    "analyzed_at": "2026-07-08T19:47:15.168730Z",
     "path": "/repo",
     "since": null,
     "until": null
@@ -588,12 +639,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 1,
-                  "hotspot_activity_weight_normalized": 0.06666666666666667,
+                  "hotspot_activity_weight_normalized": 0.058823529411764705,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 1,
-                  "revision_count_normalized": 0.06666666666666667,
+                  "revision_count_normalized": 0.058823529411764705,
                   "scores": {
                     "health": {
                       "factors": {
@@ -677,12 +728,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 5,
-                  "hotspot_activity_weight_normalized": 0.3333333333333333,
+                  "hotspot_activity_weight_normalized": 0.29411764705882354,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 5,
-                  "revision_count_normalized": 0.3333333333333333,
+                  "revision_count_normalized": 0.29411764705882354,
                   "scores": {
                     "health": {
                       "factors": {
@@ -738,12 +789,12 @@
                     "incoming_dependency_count": 0,
                     "outgoing_dependency_count": 0
                   },
-                  "hotspot_activity_weight": 15,
+                  "hotspot_activity_weight": 17,
                   "hotspot_activity_weight_normalized": 1.0,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
-                  "revision_count": 15,
+                  "revision_count": 17,
                   "revision_count_normalized": 1.0,
                   "scores": {
                     "health": {
@@ -800,13 +851,13 @@
                     "incoming_dependency_count": 0,
                     "outgoing_dependency_count": 0
                   },
-                  "hotspot_activity_weight": 15,
-                  "hotspot_activity_weight_normalized": 1.0,
+                  "hotspot_activity_weight": 16,
+                  "hotspot_activity_weight_normalized": 0.9411764705882353,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
-                  "revision_count": 15,
-                  "revision_count_normalized": 1.0,
+                  "revision_count": 16,
+                  "revision_count_normalized": 0.9411764705882353,
                   "scores": {
                     "health": {
                       "factors": {
@@ -863,12 +914,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 2,
-                  "hotspot_activity_weight_normalized": 0.13333333333333333,
+                  "hotspot_activity_weight_normalized": 0.11764705882352941,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 2,
-                  "revision_count_normalized": 0.13333333333333333,
+                  "revision_count_normalized": 0.11764705882352941,
                   "scores": {
                     "health": {
                       "factors": {
@@ -925,12 +976,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 11,
-                  "hotspot_activity_weight_normalized": 0.7333333333333333,
+                  "hotspot_activity_weight_normalized": 0.6470588235294118,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 11,
-                  "revision_count_normalized": 0.7333333333333333,
+                  "revision_count_normalized": 0.6470588235294118,
                   "scores": {
                     "health": {
                       "factors": {
@@ -987,12 +1038,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 11,
-                  "hotspot_activity_weight_normalized": 0.7333333333333333,
+                  "hotspot_activity_weight_normalized": 0.6470588235294118,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 11,
-                  "revision_count_normalized": 0.7333333333333333,
+                  "revision_count_normalized": 0.6470588235294118,
                   "scores": {
                     "health": {
                       "factors": {
@@ -1049,12 +1100,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 5,
-                  "hotspot_activity_weight_normalized": 0.3333333333333333,
+                  "hotspot_activity_weight_normalized": 0.29411764705882354,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 5,
-                  "revision_count_normalized": 0.3333333333333333,
+                  "revision_count_normalized": 0.29411764705882354,
                   "scores": {
                     "health": {
                       "factors": {
@@ -1111,12 +1162,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 1,
-                  "hotspot_activity_weight_normalized": 0.06666666666666667,
+                  "hotspot_activity_weight_normalized": 0.058823529411764705,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 1,
-                  "revision_count_normalized": 0.06666666666666667,
+                  "revision_count_normalized": 0.058823529411764705,
                   "scores": {
                     "health": {
                       "factors": {
@@ -1224,13 +1275,288 @@
                 "incoming_dependency_count": 0,
                 "outgoing_dependency_count": 0
               },
+              "hotspot_activity_weight": 3,
+              "hotspot_activity_weight_normalized": 0.17647058823529413,
+              "hotspot_score": 0.0,
+              "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
+              "hotspot_size_score": 0.0,
+              "revision_count": 3,
+              "revision_count_normalized": 0.17647058823529413,
+              "scores": {
+                "health": {
+                  "factors": {
+                    "file_size_health": 10.0,
+                    "function_health_available": false,
+                    "import_coupling_count": 0,
+                    "import_coupling_penalty": 0.0,
+                    "incoming_dependency_count": 0,
+                    "outgoing_dependency_count": 0
+                  },
+                  "formula": "file_size_health - import_coupling_penalty",
+                  "reasons": [
+                    "no functions detected by Lizard"
+                  ],
+                  "scale": "0_to_10",
+                  "score": 10.0
+                }
+              },
+              "static_analysis": {
+                "avg_function_complexity": 0.0,
+                "avg_function_nloc": 0.0,
+                "avg_nesting_depth": 0.0,
+                "boolean_operator_count": 0,
+                "class_count": 0,
+                "complex_conditional_count": 0,
+                "conditional_count": 0,
+                "function_count": 0,
+                "high_complexity_function_count": 0,
+                "large_function_count": 0,
+                "max_function_complexity": 0,
+                "max_function_nloc": 0,
+                "max_function_parameter_count": 0,
+                "max_nesting_depth": 0,
+                "top_level_function_count": 0
+              }
+            },
+            "name": "repo_codehealth_analysis_0_main.json",
+            "path": "demo_artifacts/repo_codehealth_analysis_0_main.json",
+            "path_format": "posix",
+            "path_kind": "repository_relative",
+            "symbols": {
+              "functions": []
+            }
+          },
+          {
+            "children": [],
+            "dependencies": [],
+            "kind": "file",
+            "language": null,
+            "metrics": {
+              "dependency_analysis": {
+                "import_coupling_count": 0,
+                "incoming_dependency_count": 0,
+                "outgoing_dependency_count": 0
+              },
+              "hotspot_activity_weight": 3,
+              "hotspot_activity_weight_normalized": 0.17647058823529413,
+              "hotspot_score": 0.0,
+              "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
+              "hotspot_size_score": 0.0,
+              "revision_count": 3,
+              "revision_count_normalized": 0.17647058823529413,
+              "scores": {
+                "health": {
+                  "factors": {
+                    "file_size_health": 10.0,
+                    "function_health_available": false,
+                    "import_coupling_count": 0,
+                    "import_coupling_penalty": 0.0,
+                    "incoming_dependency_count": 0,
+                    "outgoing_dependency_count": 0
+                  },
+                  "formula": "file_size_health - import_coupling_penalty",
+                  "reasons": [
+                    "no functions detected by Lizard"
+                  ],
+                  "scale": "0_to_10",
+                  "score": 10.0
+                }
+              },
+              "static_analysis": {
+                "avg_function_complexity": 0.0,
+                "avg_function_nloc": 0.0,
+                "avg_nesting_depth": 0.0,
+                "boolean_operator_count": 0,
+                "class_count": 0,
+                "complex_conditional_count": 0,
+                "conditional_count": 0,
+                "function_count": 0,
+                "high_complexity_function_count": 0,
+                "large_function_count": 0,
+                "max_function_complexity": 0,
+                "max_function_nloc": 0,
+                "max_function_parameter_count": 0,
+                "max_nesting_depth": 0,
+                "top_level_function_count": 0
+              }
+            },
+            "name": "repo_codehealth_analysis_1_feature_sloppy.json",
+            "path": "demo_artifacts/repo_codehealth_analysis_1_feature_sloppy.json",
+            "path_format": "posix",
+            "path_kind": "repository_relative",
+            "symbols": {
+              "functions": []
+            }
+          },
+          {
+            "children": [],
+            "dependencies": [],
+            "kind": "file",
+            "language": null,
+            "metrics": {
+              "dependency_analysis": {
+                "import_coupling_count": 0,
+                "incoming_dependency_count": 0,
+                "outgoing_dependency_count": 0
+              },
+              "hotspot_activity_weight": 3,
+              "hotspot_activity_weight_normalized": 0.17647058823529413,
+              "hotspot_score": 0.0,
+              "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
+              "hotspot_size_score": 0.0,
+              "revision_count": 3,
+              "revision_count_normalized": 0.17647058823529413,
+              "scores": {
+                "health": {
+                  "factors": {
+                    "file_size_health": 10.0,
+                    "function_health_available": false,
+                    "import_coupling_count": 0,
+                    "import_coupling_penalty": 0.0,
+                    "incoming_dependency_count": 0,
+                    "outgoing_dependency_count": 0
+                  },
+                  "formula": "file_size_health - import_coupling_penalty",
+                  "reasons": [
+                    "no functions detected by Lizard"
+                  ],
+                  "scale": "0_to_10",
+                  "score": 10.0
+                }
+              },
+              "static_analysis": {
+                "avg_function_complexity": 0.0,
+                "avg_function_nloc": 0.0,
+                "avg_nesting_depth": 0.0,
+                "boolean_operator_count": 0,
+                "class_count": 0,
+                "complex_conditional_count": 0,
+                "conditional_count": 0,
+                "function_count": 0,
+                "high_complexity_function_count": 0,
+                "large_function_count": 0,
+                "max_function_complexity": 0,
+                "max_function_nloc": 0,
+                "max_function_parameter_count": 0,
+                "max_nesting_depth": 0,
+                "top_level_function_count": 0
+              }
+            },
+            "name": "repo_codehealth_analysis_2_feature_unslopped.json",
+            "path": "demo_artifacts/repo_codehealth_analysis_2_feature_unslopped.json",
+            "path_format": "posix",
+            "path_kind": "repository_relative",
+            "symbols": {
+              "functions": []
+            }
+          },
+          {
+            "children": [],
+            "dependencies": [],
+            "kind": "file",
+            "language": null,
+            "metrics": {
+              "dependency_analysis": {
+                "import_coupling_count": 0,
+                "incoming_dependency_count": 0,
+                "outgoing_dependency_count": 0
+              },
+              "hotspot_activity_weight": 1,
+              "hotspot_activity_weight_normalized": 0.058823529411764705,
+              "hotspot_score": 0.0,
+              "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
+              "hotspot_size_score": 0.0,
+              "revision_count": 1,
+              "revision_count_normalized": 0.058823529411764705,
+              "scores": {
+                "health": {
+                  "factors": {
+                    "file_size_health": 10.0,
+                    "function_health_available": false,
+                    "import_coupling_count": 0,
+                    "import_coupling_penalty": 0.0,
+                    "incoming_dependency_count": 0,
+                    "outgoing_dependency_count": 0
+                  },
+                  "formula": "file_size_health - import_coupling_penalty",
+                  "reasons": [
+                    "no functions detected by Lizard"
+                  ],
+                  "scale": "0_to_10",
+                  "score": 10.0
+                }
+              },
+              "static_analysis": {
+                "avg_function_complexity": 0.0,
+                "avg_function_nloc": 0.0,
+                "avg_nesting_depth": 0.0,
+                "boolean_operator_count": 0,
+                "class_count": 0,
+                "complex_conditional_count": 0,
+                "conditional_count": 0,
+                "function_count": 0,
+                "high_complexity_function_count": 0,
+                "large_function_count": 0,
+                "max_function_complexity": 0,
+                "max_function_nloc": 0,
+                "max_function_parameter_count": 0,
+                "max_nesting_depth": 0,
+                "top_level_function_count": 0
+              }
+            },
+            "name": "slop-to-unslop-demo.mp4",
+            "path": "demo_artifacts/slop-to-unslop-demo.mp4",
+            "path_format": "posix",
+            "path_kind": "repository_relative",
+            "symbols": {
+              "functions": []
+            }
+          }
+        ],
+        "dependencies": [],
+        "kind": "directory",
+        "language": null,
+        "metrics": {
+          "scores": {
+            "health": {
+              "formula": "code_line_weighted_average(file_health_score)",
+              "low_health_file_count": 0,
+              "median_child_health_score": 10.0,
+              "scale": "0_to_10",
+              "score": 10.0,
+              "top_low_health_files": [],
+              "total_code_line_count": 0,
+              "weighted_average_file_health_score": 10.0,
+              "worst_child_health_score": 10.0
+            }
+          }
+        },
+        "name": "demo_artifacts",
+        "path": "demo_artifacts",
+        "path_format": "posix",
+        "path_kind": "repository_relative",
+        "symbols": {}
+      },
+      {
+        "children": [
+          {
+            "children": [],
+            "dependencies": [],
+            "kind": "file",
+            "language": null,
+            "metrics": {
+              "dependency_analysis": {
+                "import_coupling_count": 0,
+                "incoming_dependency_count": 0,
+                "outgoing_dependency_count": 0
+              },
               "hotspot_activity_weight": 2,
-              "hotspot_activity_weight_normalized": 0.13333333333333333,
+              "hotspot_activity_weight_normalized": 0.11764705882352941,
               "hotspot_score": 0.0,
               "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
               "hotspot_size_score": 0.0,
               "revision_count": 2,
-              "revision_count_normalized": 0.13333333333333333,
+              "revision_count_normalized": 0.11764705882352941,
               "scores": {
                 "health": {
                   "factors": {
@@ -1322,12 +1648,12 @@
                   },
                   "file_language": "Python",
                   "hotspot_activity_weight": 1,
-                  "hotspot_activity_weight_normalized": 0.06666666666666667,
-                  "hotspot_score": 0.001246105919003115,
+                  "hotspot_activity_weight_normalized": 0.058823529411764705,
+                  "hotspot_score": 0.0010695187165775401,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
-                  "hotspot_size_score": 0.018691588785046728,
+                  "hotspot_size_score": 0.01818181818181818,
                   "revision_count": 1,
-                  "revision_count_normalized": 0.06666666666666667,
+                  "revision_count_normalized": 0.058823529411764705,
                   "scores": {
                     "health": {
                       "factors": {
@@ -1388,12 +1714,12 @@
                   },
                   "file_language": "Python",
                   "hotspot_activity_weight": 1,
-                  "hotspot_activity_weight_normalized": 0.06666666666666667,
-                  "hotspot_score": 0.03800623052959501,
+                  "hotspot_activity_weight_normalized": 0.058823529411764705,
+                  "hotspot_score": 0.032620320855614976,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
-                  "hotspot_size_score": 0.5700934579439252,
+                  "hotspot_size_score": 0.5545454545454546,
                   "revision_count": 1,
-                  "revision_count_normalized": 0.06666666666666667,
+                  "revision_count_normalized": 0.058823529411764705,
                   "scores": {
                     "health": {
                       "factors": {
@@ -1929,8 +2255,8 @@
                 "kind": "file",
                 "language": "Python",
                 "metrics": {
-                  "blank_line_count": 30,
-                  "code_line_count": 107,
+                  "blank_line_count": 28,
+                  "code_line_count": 110,
                   "comment_line_count": 1,
                   "dependency_analysis": {
                     "import_coupling_count": 2,
@@ -1938,51 +2264,52 @@
                     "outgoing_dependency_count": 0
                   },
                   "file_language": "Python",
-                  "hotspot_activity_weight": 4,
-                  "hotspot_activity_weight_normalized": 0.26666666666666666,
-                  "hotspot_score": 0.26666666666666666,
+                  "hotspot_activity_weight": 5,
+                  "hotspot_activity_weight_normalized": 0.29411764705882354,
+                  "hotspot_score": 0.29411764705882354,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 1.0,
-                  "revision_count": 4,
-                  "revision_count_normalized": 0.26666666666666666,
+                  "revision_count": 5,
+                  "revision_count_normalized": 0.29411764705882354,
                   "scores": {
                     "health": {
                       "factors": {
-                        "base_health_score": 8.5,
+                        "base_health_score": 7.0,
                         "function_health_available": true,
                         "import_coupling_count": 2,
                         "import_coupling_penalty": 0.0,
                         "incoming_dependency_count": 2,
                         "outgoing_dependency_count": 0,
-                        "weighted_average_function_health": 8.77,
-                        "worst_function_cap": 8.5,
+                        "weighted_average_function_health": 7.78,
+                        "worst_function_cap": 7.0,
                         "worst_function_cap_bonus": 2.0,
-                        "worst_function_health": 6.5
+                        "worst_function_health": 5.0
                       },
                       "formula": "min(weighted_average_function_health, worst_function_health + worst_function_cap_bonus) - import_coupling_penalty",
                       "reasons": [
+                        "contains low-health function",
                         "capped by low-health function"
                       ],
                       "scale": "0_to_10",
-                      "score": 8.5
+                      "score": 7.0
                     }
                   },
                   "static_analysis": {
-                    "avg_function_complexity": 3.5454545454545454,
-                    "avg_function_nloc": 8.545454545454545,
-                    "avg_nesting_depth": 1.1818181818181819,
+                    "avg_function_complexity": 4.7,
+                    "avg_function_nloc": 9.7,
+                    "avg_nesting_depth": 1.2,
                     "boolean_operator_count": 6,
                     "class_count": 0,
                     "complex_conditional_count": 4,
-                    "conditional_count": 16,
-                    "function_count": 11,
-                    "high_complexity_function_count": 0,
+                    "conditional_count": 25,
+                    "function_count": 10,
+                    "high_complexity_function_count": 1,
                     "large_function_count": 0,
-                    "max_function_complexity": 9,
-                    "max_function_nloc": 33,
+                    "max_function_complexity": 14,
+                    "max_function_nloc": 37,
                     "max_function_parameter_count": 2,
                     "max_nesting_depth": 3,
-                    "top_level_function_count": 11
+                    "top_level_function_count": 10
                   }
                 },
                 "name": "processor.py",
@@ -1995,7 +2322,7 @@
                       "cyclomatic_complexity": 3,
                       "end_line": 18,
                       "length": 7,
-                      "name": "_text_field( mapping : JsonMap , key : str )",
+                      "name": "_number_field( mapping : JsonMap , key : str )",
                       "nloc": 7,
                       "parameter_count": 2,
                       "scores": {
@@ -2024,40 +2351,8 @@
                       }
                     },
                     {
-                      "cyclomatic_complexity": 3,
-                      "end_line": 27,
-                      "length": 7,
-                      "name": "_number_field( mapping : JsonMap , key : str )",
-                      "nloc": 7,
-                      "parameter_count": 2,
-                      "scores": {
-                        "health": {
-                          "factors": {
-                            "complexity_penalty": 0.0,
-                            "conditional_penalty": 0.0,
-                            "nesting_penalty": 0.0,
-                            "parameter_penalty": 0.0,
-                            "size_penalty": 0.0
-                          },
-                          "formula": "10 - size_penalty - complexity_penalty - parameter_penalty - nesting_penalty - conditional_penalty",
-                          "reasons": [
-                            "small low-complexity function"
-                          ],
-                          "scale": "0_to_10",
-                          "score": 10.0
-                        }
-                      },
-                      "start_line": 21,
-                      "structural_metrics": {
-                        "boolean_operator_count": 0,
-                        "complex_conditional_count": 0,
-                        "conditional_count": 2,
-                        "max_nesting_depth": 1
-                      }
-                    },
-                    {
                       "cyclomatic_complexity": 5,
-                      "end_line": 38,
+                      "end_line": 29,
                       "length": 9,
                       "name": "_list_path( mapping : JsonMap , keys : tuple [ str , ... ] )",
                       "nloc": 9,
@@ -2079,7 +2374,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 30,
+                      "start_line": 21,
                       "structural_metrics": {
                         "boolean_operator_count": 1,
                         "complex_conditional_count": 1,
@@ -2088,16 +2383,16 @@
                       }
                     },
                     {
-                      "cyclomatic_complexity": 4,
-                      "end_line": 49,
-                      "length": 9,
+                      "cyclomatic_complexity": 6,
+                      "end_line": 43,
+                      "length": 12,
                       "name": "_payload_metadata( order : JsonMap )",
-                      "nloc": 9,
+                      "nloc": 12,
                       "parameter_count": 1,
                       "scores": {
                         "health": {
                           "factors": {
-                            "complexity_penalty": 0.0,
+                            "complexity_penalty": 1.5,
                             "conditional_penalty": 0.0,
                             "nesting_penalty": 0.0,
                             "parameter_penalty": 0.0,
@@ -2105,23 +2400,23 @@
                           },
                           "formula": "10 - size_penalty - complexity_penalty - parameter_penalty - nesting_penalty - conditional_penalty",
                           "reasons": [
-                            "small low-complexity function"
+                            "moderate cyclomatic complexity"
                           ],
                           "scale": "0_to_10",
-                          "score": 10.0
+                          "score": 8.5
                         }
                       },
-                      "start_line": 41,
+                      "start_line": 32,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
-                        "conditional_count": 1,
+                        "conditional_count": 3,
                         "max_nesting_depth": 1
                       }
                     },
                     {
                       "cyclomatic_complexity": 3,
-                      "end_line": 60,
+                      "end_line": 54,
                       "length": 9,
                       "name": "parse_int_or_default( raw : JsonValue , default : int = 0 )",
                       "nloc": 7,
@@ -2143,7 +2438,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 52,
+                      "start_line": 46,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
@@ -2152,16 +2447,16 @@
                       }
                     },
                     {
-                      "cyclomatic_complexity": 4,
-                      "end_line": 68,
-                      "length": 6,
+                      "cyclomatic_complexity": 6,
+                      "end_line": 64,
+                      "length": 8,
                       "name": "_book_score( item : JsonMap )",
-                      "nloc": 6,
+                      "nloc": 8,
                       "parameter_count": 1,
                       "scores": {
                         "health": {
                           "factors": {
-                            "complexity_penalty": 0.0,
+                            "complexity_penalty": 1.5,
                             "conditional_penalty": 0.0,
                             "nesting_penalty": 0.0,
                             "parameter_penalty": 0.0,
@@ -2169,23 +2464,23 @@
                           },
                           "formula": "10 - size_penalty - complexity_penalty - parameter_penalty - nesting_penalty - conditional_penalty",
                           "reasons": [
-                            "small low-complexity function"
+                            "moderate cyclomatic complexity"
                           ],
                           "scale": "0_to_10",
-                          "score": 10.0
+                          "score": 8.5
                         }
                       },
-                      "start_line": 63,
+                      "start_line": 57,
                       "structural_metrics": {
                         "boolean_operator_count": 2,
                         "complex_conditional_count": 1,
-                        "conditional_count": 1,
+                        "conditional_count": 3,
                         "max_nesting_depth": 1
                       }
                     },
                     {
                       "cyclomatic_complexity": 3,
-                      "end_line": 74,
+                      "end_line": 70,
                       "length": 4,
                       "name": "_subscription_score( item : JsonMap )",
                       "nloc": 4,
@@ -2207,7 +2502,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 71,
+                      "start_line": 67,
                       "structural_metrics": {
                         "boolean_operator_count": 1,
                         "complex_conditional_count": 1,
@@ -2217,7 +2512,7 @@
                     },
                     {
                       "cyclomatic_complexity": 2,
-                      "end_line": 81,
+                      "end_line": 77,
                       "length": 5,
                       "name": "_credit_score( item : JsonMap )",
                       "nloc": 5,
@@ -2239,7 +2534,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 77,
+                      "start_line": 73,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
@@ -2249,7 +2544,7 @@
                     },
                     {
                       "cyclomatic_complexity": 1,
-                      "end_line": 85,
+                      "end_line": 81,
                       "length": 2,
                       "name": "_gift_score( item : JsonMap )",
                       "nloc": 2,
@@ -2271,7 +2566,7 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 84,
+                      "start_line": 80,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
@@ -2280,11 +2575,11 @@
                       }
                     },
                     {
-                      "cyclomatic_complexity": 2,
-                      "end_line": 100,
-                      "length": 5,
+                      "cyclomatic_complexity": 4,
+                      "end_line": 97,
+                      "length": 6,
                       "name": "_score_item( item : JsonMap )",
-                      "nloc": 5,
+                      "nloc": 6,
                       "parameter_count": 1,
                       "scores": {
                         "health": {
@@ -2303,25 +2598,25 @@
                           "score": 10.0
                         }
                       },
-                      "start_line": 96,
+                      "start_line": 92,
                       "structural_metrics": {
                         "boolean_operator_count": 0,
                         "complex_conditional_count": 0,
-                        "conditional_count": 1,
+                        "conditional_count": 3,
                         "max_nesting_depth": 1
                       }
                     },
                     {
-                      "cyclomatic_complexity": 9,
-                      "end_line": 138,
-                      "length": 36,
+                      "cyclomatic_complexity": 14,
+                      "end_line": 139,
+                      "length": 40,
                       "name": "process_order( order : JsonMap )",
-                      "nloc": 33,
+                      "nloc": 37,
                       "parameter_count": 1,
                       "scores": {
                         "health": {
                           "factors": {
-                            "complexity_penalty": 1.5,
+                            "complexity_penalty": 3.0,
                             "conditional_penalty": 0.0,
                             "nesting_penalty": 1.0,
                             "parameter_penalty": 0.0,
@@ -2330,18 +2625,18 @@
                           "formula": "10 - size_penalty - complexity_penalty - parameter_penalty - nesting_penalty - conditional_penalty",
                           "reasons": [
                             "moderate-size function",
-                            "moderate cyclomatic complexity",
+                            "high cyclomatic complexity",
                             "nested complexity"
                           ],
                           "scale": "0_to_10",
-                          "score": 6.5
+                          "score": 5.0
                         }
                       },
-                      "start_line": 103,
+                      "start_line": 100,
                       "structural_metrics": {
                         "boolean_operator_count": 2,
                         "complex_conditional_count": 1,
-                        "conditional_count": 4,
+                        "conditional_count": 9,
                         "max_nesting_depth": 3
                       }
                     }
@@ -2360,12 +2655,12 @@
                     "outgoing_dependency_count": 0
                   },
                   "hotspot_activity_weight": 2,
-                  "hotspot_activity_weight_normalized": 0.13333333333333333,
+                  "hotspot_activity_weight_normalized": 0.11764705882352941,
                   "hotspot_score": 0.0,
                   "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
                   "hotspot_size_score": 0.0,
                   "revision_count": 2,
-                  "revision_count_normalized": 0.13333333333333333,
+                  "revision_count_normalized": 0.11764705882352941,
                   "scores": {
                     "health": {
                       "factors": {
@@ -2421,11 +2716,11 @@
                   "low_health_file_count": 0,
                   "median_child_health_score": 9.91,
                   "scale": "0_to_10",
-                  "score": 8.99,
+                  "score": 8.04,
                   "top_low_health_files": [],
-                  "total_code_line_count": 170,
-                  "weighted_average_file_health_score": 8.99,
-                  "worst_child_health_score": 8.5
+                  "total_code_line_count": 173,
+                  "weighted_average_file_health_score": 8.04,
+                  "worst_child_health_score": 7.0
                 }
               }
             },
@@ -2446,11 +2741,11 @@
               "low_health_file_count": 0,
               "median_child_health_score": 9.91,
               "scale": "0_to_10",
-              "score": 8.99,
+              "score": 8.04,
               "top_low_health_files": [],
-              "total_code_line_count": 170,
-              "weighted_average_file_health_score": 8.99,
-              "worst_child_health_score": 8.5
+              "total_code_line_count": 173,
+              "weighted_average_file_health_score": 8.04,
+              "worst_child_health_score": 7.0
             }
           }
         },
@@ -2480,12 +2775,12 @@
               },
               "file_language": "Python",
               "hotspot_activity_weight": 1,
-              "hotspot_activity_weight_normalized": 0.06666666666666667,
-              "hotspot_score": 0.023676012461059187,
+              "hotspot_activity_weight_normalized": 0.058823529411764705,
+              "hotspot_score": 0.020320855614973262,
               "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
-              "hotspot_size_score": 0.35514018691588783,
+              "hotspot_size_score": 0.34545454545454546,
               "revision_count": 1,
-              "revision_count_normalized": 0.06666666666666667,
+              "revision_count_normalized": 0.058823529411764705,
               "scores": {
                 "health": {
                   "factors": {
@@ -2681,12 +2976,12 @@
               },
               "file_language": "Python",
               "hotspot_activity_weight": 2,
-              "hotspot_activity_weight_normalized": 0.13333333333333333,
-              "hotspot_score": 0.037383177570093455,
+              "hotspot_activity_weight_normalized": 0.11764705882352941,
+              "hotspot_score": 0.0320855614973262,
               "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
-              "hotspot_size_score": 0.2803738317757009,
+              "hotspot_size_score": 0.2727272727272727,
               "revision_count": 2,
-              "revision_count_normalized": 0.13333333333333333,
+              "revision_count_normalized": 0.11764705882352941,
               "scores": {
                 "health": {
                   "factors": {
@@ -2837,12 +3132,12 @@
             "outgoing_dependency_count": 0
           },
           "hotspot_activity_weight": 1,
-          "hotspot_activity_weight_normalized": 0.06666666666666667,
+          "hotspot_activity_weight_normalized": 0.058823529411764705,
           "hotspot_score": 0.0,
           "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
           "hotspot_size_score": 0.0,
           "revision_count": 1,
-          "revision_count_normalized": 0.06666666666666667,
+          "revision_count_normalized": 0.058823529411764705,
           "scores": {
             "health": {
               "factors": {
@@ -2899,12 +3194,12 @@
             "outgoing_dependency_count": 0
           },
           "hotspot_activity_weight": 1,
-          "hotspot_activity_weight_normalized": 0.06666666666666667,
+          "hotspot_activity_weight_normalized": 0.058823529411764705,
           "hotspot_score": 0.0,
           "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
           "hotspot_size_score": 0.0,
           "revision_count": 1,
-          "revision_count_normalized": 0.06666666666666667,
+          "revision_count_normalized": 0.058823529411764705,
           "scores": {
             "health": {
               "factors": {
@@ -2960,13 +3255,13 @@
             "incoming_dependency_count": 0,
             "outgoing_dependency_count": 0
           },
-          "hotspot_activity_weight": 3,
-          "hotspot_activity_weight_normalized": 0.2,
+          "hotspot_activity_weight": 4,
+          "hotspot_activity_weight_normalized": 0.23529411764705882,
           "hotspot_score": 0.0,
           "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
           "hotspot_size_score": 0.0,
-          "revision_count": 3,
-          "revision_count_normalized": 0.2,
+          "revision_count": 4,
+          "revision_count_normalized": 0.23529411764705882,
           "scores": {
             "health": {
               "factors": {
@@ -3023,12 +3318,12 @@
             "outgoing_dependency_count": 0
           },
           "hotspot_activity_weight": 1,
-          "hotspot_activity_weight_normalized": 0.06666666666666667,
+          "hotspot_activity_weight_normalized": 0.058823529411764705,
           "hotspot_score": 0.0,
           "hotspot_score_formula": "revision_count_normalized * hotspot_size_score",
           "hotspot_size_score": 0.0,
           "revision_count": 1,
-          "revision_count_normalized": 0.06666666666666667,
+          "revision_count_normalized": 0.058823529411764705,
           "scores": {
             "health": {
               "factors": {
@@ -3084,11 +3379,11 @@
           "low_health_file_count": 0,
           "median_child_health_score": 10.0,
           "scale": "0_to_10",
-          "score": 9.32,
+          "score": 8.69,
           "top_low_health_files": [],
-          "total_code_line_count": 238,
-          "weighted_average_file_health_score": 9.32,
-          "worst_child_health_score": 8.5
+          "total_code_line_count": 241,
+          "weighted_average_file_health_score": 8.69,
+          "worst_child_health_score": 7.0
         }
       }
     },
@@ -3108,6 +3403,7 @@
       "blank_line_count": "Blank lines for this file from cloc.",
       "boolean_operator_count": "Number of boolean operators inside branch conditions. Maps to CodeScene's Complex Conditional signal.",
       "class_count": "Number of Python classes in a file. Early module responsibility pressure signal related to Brain Class/God Class analysis.",
+      "classic_smells": "Classic code, architectural, and structural smell findings. Preserved as raw evidence under the top-level classic_smells key and not currently used in health scoring.",
       "code_duplication_ratio": "Duplicated code lines as a percentage of total code lines.",
       "code_duplication_total": "Number of duplicated code lines across all files. A line is duplicated when it belongs to a block of 10 or more consecutive non-empty, non-comment lines that appear identically in at least one other file. Uses union of overlapping ranges per file.",
       "code_line_count": "Physical code lines for this file from cloc.",
@@ -3153,7 +3449,6 @@
       "methods_total": "Total number of functions across all source files in the project.",
       "nesting_penalty": "Function health penalty from AST max_nesting_depth.",
       "outgoing_dependency_count": "Number of unique local Python files imported by this file.",
-      "classic_smells": "Classic code, architectural, and structural smell findings. Preserved as raw evidence under the top-level classic_smells key and not currently used in health scoring.",
       "revision_count": "Number of Git revisions that touched this repository-relative path during the configured analysis window. Produced by Code Maat revisions analysis.",
       "revision_count_normalized": "revision_count divided by the maximum revision_count observed in this analysis output. Range: 0.0 to 1.0.",
       "risk_score": "Reserved for a future score combining temporal activity with low health.",
@@ -3182,11 +3477,11 @@
   "summary": {
     "code_duplication_ratio": 0.0,
     "code_duplication_total": 0,
-    "file_count": 20,
+    "file_count": 24,
     "file_duplication_ratio": 0.0,
     "file_duplication_total": 0,
-    "folders_total": 8,
-    "huge_cyclomatic_complexity_ratio": 0.0,
+    "folders_total": 9,
+    "huge_cyclomatic_complexity_ratio": 3.225806451612903,
     "huge_depth_ratio": 0.0,
     "huge_depth_total": 0,
     "huge_folder_ratio": 0.0,
@@ -3194,31 +3489,31 @@
     "huge_method_ratio": 0.0,
     "huge_non_headerfile_ratio": 0.0,
     "huge_non_headerfile_total": 0,
-    "lines_per_file": 11.9,
-    "max_code_line_count": 107,
-    "max_revision_count": 15,
-    "methods_total": 32,
+    "lines_per_file": 10.041666666666666,
+    "max_code_line_count": 110,
+    "max_revision_count": 17,
+    "methods_total": 31,
     "python_file_count": 5,
     "scores": {
       "health": {
-        "file_count": 20,
+        "file_count": 24,
         "formula": "code_line_weighted_average(file_health_score)",
         "low_health_file_count": 0,
         "median_child_health_score": 10.0,
         "scale": "0_to_10",
-        "score": 9.32,
+        "score": 8.69,
         "top_low_health_files": [],
-        "total_code_line_count": 238,
-        "weighted_average_file_health_score": 9.32,
-        "worst_child_health_score": 8.5,
+        "total_code_line_count": 241,
+        "weighted_average_file_health_score": 8.69,
+        "worst_child_health_score": 7.0,
         "worst_files": []
       }
     },
-    "structural_erosion": 0.0,
-    "total_code_line_count": 238,
-    "total_cyclomatic_complexity": 77,
-    "total_method_lines": 207,
-    "total_raw_lines": 323,
+    "structural_erosion": 0.3227407107378952,
+    "total_code_line_count": 241,
+    "total_cyclomatic_complexity": 85,
+    "total_method_lines": 210,
+    "total_raw_lines": 324,
     "warning_suppression_kloc": 0.0,
     "warning_suppression_total": 0
   }
