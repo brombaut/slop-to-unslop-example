@@ -44,25 +44,24 @@ def _text(record: OfferRecord, key: str) -> str:
     return str(record[key])
 
 
+def _meets_offer_launch_rules(subject: OfferRecord, purchase: OfferRecord) -> bool:
+    if not _flag(subject, "active"):
+        return False
+    if _flag(subject, "suspended"):
+        return False
+    if _amount(purchase, "subtotal") < 100:
+        return False
+    if _text(subject, "tier") not in {"gold", "platinum"}:
+        return False
+    return _text(subject, "country") in {"US", "CA"}
+
+
 def qualifies_for_trial_discount(customer: OfferRecord, invoice: OfferRecord) -> bool:
-    if not _flag(customer, "active"):
-        return False
-    if _flag(customer, "suspended"):
-        return False
-    if _amount(invoice, "subtotal") < 100:
-        return False
-    if _text(customer, "tier") not in {"gold", "platinum"}:
-        return False
-    return _text(customer, "country") in {"US", "CA"}
+    return _meets_offer_launch_rules(customer, invoice)
 
 
 def can_receive_intro_offer(account: OfferRecord, cart: OfferRecord) -> bool:
-    active_account = _flag(account, "active")
-    account_allowed = not _flag(account, "suspended")
-    enough_value = _amount(cart, "subtotal") >= 100
-    preferred_tier = _text(account, "tier") == "gold" or _text(account, "tier") == "platinum"
-    supported_country = _text(account, "country") == "US" or _text(account, "country") == "CA"
-    return active_account and account_allowed and enough_value and preferred_tier and supported_country
+    return _meets_offer_launch_rules(account, cart)
 
 
 def normalize_env_value(value: str | None) -> str:
@@ -79,13 +78,12 @@ def parse_env_token(raw: str | None) -> str:
 
 
 def summarize_offer_labels(labels: list[str]) -> tuple[str, ...]:
-    # Return the labels
     normalized = [label.strip() for label in labels]
     return tuple(normalized)
 
 
 def has_offer_labels(buffer: OfferLabelBuffer) -> bool:
-    return buffer.length > 0
+    return len(buffer) > 0
 
 
 def append_offer_label(buffer: OfferLabelBuffer, label: str) -> list[str]:
