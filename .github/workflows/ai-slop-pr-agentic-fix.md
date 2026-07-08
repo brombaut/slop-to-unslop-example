@@ -51,7 +51,7 @@ safe-outputs:
     footer: false
   create-pull-request-review-comment:
   create-pull-request:
-    title-prefix: "Apply code quality fixes"
+    title-prefix: "Apply code quality remediation: "
     draft: false
     max: 1
     base-branch: ${{ github.event.pull_request.head.ref }}
@@ -433,7 +433,7 @@ steps:
       git config user.name "github-actions[bot]"
       git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
       git add -A
-      git commit -m "Apply generated code quality fixes for PR #${ORIGINAL_PR_NUMBER}"
+      git commit -m "Apply generated code quality remediation for PR #${ORIGINAL_PR_NUMBER}"
 
       python - <<'PY'
       import json
@@ -457,9 +457,9 @@ steps:
       head_ref = os.environ["ORIGINAL_PR_HEAD_REF"]
       run_id = os.environ["WORKFLOW_RUN_ID"]
 
-      title = f"Apply code quality fixes for PR #{pr_number}"
+      title = f"PR #{pr_number}"
       branch = f"code-quality/agentic-fix-pr-{pr_number}-{run_id}"
-      body = f"""This PR applies generated code quality fixes for the original pull request.
+      body = f"""This PR applies generated code quality remediation for the original pull request.
 
       ## Original Pull Request
 
