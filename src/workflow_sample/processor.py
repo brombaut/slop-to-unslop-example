@@ -74,6 +74,16 @@ def _gift_score(item: JsonMap) -> float:
     return 5
 
 
+def _audit_labels(item: JsonMap) -> list[str]:
+    return [
+        str(item.get("kind", "")),
+        str(item.get("region", "")),
+        str(item.get("quantity", "")),
+        str(item.get("price", "")),
+        str(item.get("active", "")),
+    ]
+
+
 ITEM_SCORERS: dict[str, Callable[[JsonMap], float]] = {
     "book": _book_score,
     "subscription": _subscription_score,
@@ -90,7 +100,6 @@ def _score_item(item: JsonMap) -> float:
 
 
 def process_order(order: JsonMap) -> JsonMap:
-    # This function processes the order
     try:
         payload = json.loads(_text_field(order, "payload") or "{}")
         if not isinstance(payload, dict):
@@ -106,13 +115,7 @@ def process_order(order: JsonMap) -> JsonMap:
 
     for item in items:
         if isinstance(item, dict):
-            audit_labels = [
-                str(item.get("kind", "")),
-                str(item.get("region", "")),
-                str(item.get("quantity", "")),
-                str(item.get("price", "")),
-                str(item.get("active", "")),
-            ]
+            audit_labels = _audit_labels(item)
             notes.extend(audit_labels[:1])
             score += _score_item(item)
 
