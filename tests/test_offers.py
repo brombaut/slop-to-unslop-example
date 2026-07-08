@@ -1,6 +1,5 @@
-# aislop-ignore-next-line ai-slop/python-hallucinated-import
-from workflow_sample.ai_slop_fixture import (
-    LabelBuffer,
+from workflow_sample.offers import (
+    OfferLabelBuffer,
     append_offer_label,
     can_receive_intro_offer,
     normalize_env_value,
@@ -42,7 +41,7 @@ def test_env_helpers_parse_known_values():
 
 
 def test_offer_label_helpers_return_labels():
-    buffer = LabelBuffer()
+    buffer = OfferLabelBuffer()
 
     assert append_offer_label(buffer, "trial") == ["trial"]
     assert summarize_offer_labels(["trial", "vip"]) == ("trial", "vip")
